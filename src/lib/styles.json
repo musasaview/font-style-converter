@@ -6,7 +6,6 @@
     "Enclosed Characters": ["circledLatin", "squaredLatin", "negativeSquaredLatin", "parenthesized", "negativeCircled"],
     "Gothic & Decorative": ["doubleStruck", "smallCaps", "fancyStrong", "fraktur", "boldFraktur"],
     "Numbers": ["circledDigit", "filledCircledDigit", "doubleCircledDigit", "parenthesizedDigit", "chemicalNumbers", "subscriptNumbers", "diceNumbers", "kansuuji", "spades", "hearts", "diamonds", "clubs", "mahjongCharacters", "mahjongCircles", "mahjongBamboos"],
-    "Half-width & Full-width": ["halfwidth", "fullwidth"],
     "Plain Text": ["plainText"]
   },
   "styles": {
@@ -119,16 +118,6 @@
       "name": "Double Circled Numbers",
       "from": "123456789",
       "to": "⓵⓶⓷⓸⓹⓺⓻⓼⓽"
-    },
-    "fullwidth": {
-      "name": "全角 (Full-width)",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｶｹｯｬｭｮﾜ",
-      "to": "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォヵヶッャュョヮ"
-    },
-    "halfwidth": {
-      "name": "半角 (Half-width)",
-      "from": "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォヵヶッャュョヮＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９",
-      "to": "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｶｹｯｬｭｮﾜABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
     },
     "chemicalNumbers": {
       "name": "Chemical Numbers",

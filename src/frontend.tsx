@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import data from "./lib/styles.json";
-import { convertText } from "./lib/converter";
+import {
+  convertText,
+  fullWidth,
+  halfWidth,
+  addHalfwidthDakutenToAll,
+  addCombiningDakutenToAll,
+} from "./lib/converter";
 import { formatCharacterSet } from "./lib/format-chars";
 import "./style.css";
 
@@ -21,6 +27,30 @@ function App() {
     } catch (err) {
       console.error("Failed to copy:", err);
     }
+  };
+
+  const renderFunctionCard = (name: string, fn: (str: string) => string, key: string) => {
+    const converted = fn(inputText);
+    const hasChange = converted !== inputText;
+    const isEmpty = !inputText || !hasChange;
+
+    return (
+      <div
+        key={key}
+        className={`result-card ${isEmpty ? "empty" : ""}`}
+        title={name}
+      >
+        <div className="card-content">{converted || inputText}</div>
+        <button
+          className={`copy-button ${copiedStyle === key ? "copied" : ""}`}
+          onClick={() => copyToClipboard(converted || inputText, key)}
+          title="コピー"
+          disabled={isEmpty}
+        >
+          {copiedStyle === key ? "✓" : "📋"}
+        </button>
+      </div>
+    );
   };
 
   const renderCategory = (categoryName: string, styleKeys: string[]) => {
@@ -99,6 +129,18 @@ function App() {
         {Object.entries(categories).map(([categoryName, styleKeys]) =>
           renderCategory(categoryName, styleKeys)
         )}
+        <div className="category-section">
+          <div className="category-header">
+            <h2 className="category-title">Width & Dakuten</h2>
+            <span className="category-preview">全角・半角・濁点</span>
+          </div>
+          <div className="results-grid">
+            {renderFunctionCard("全角 (Full Width)", fullWidth, "fullwidth")}
+            {renderFunctionCard("半角 (Half Width)", halfWidth, "halfwidth")}
+            {renderFunctionCard("濁点追加 (Add Dakuten)", addCombiningDakutenToAll, "dakuten")}
+            {renderFunctionCard("半角濁点追加 (Add Half Dakuten)", addHalfwidthDakutenToAll, "half-dakuten")}
+          </div>
+        </div>
       </div>
     </div>
   );
