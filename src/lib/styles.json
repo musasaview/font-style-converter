@@ -1,15 +1,20 @@
 {
   "categories": {
+    "Plain Text": ["plainText"],
     "Serif Styles": ["bold", "italic", "boldItalic"],
     "Sans-Serif Styles": ["sans", "sansBold", "sansItalic", "sansBoldItalic"],
     "Monospace & Script": ["mono", "script", "boldScript"],
-    "Gothic & Decorative": ["fraktur", "boldFraktur", "doubleStruck"],
-    "Special Cases": ["smallCaps", "upsideDown", "reversed"],
-    "Fullwidth & Asian": ["fullwidth"],
     "Enclosed Characters": ["circledLatin", "squaredLatin", "negativeSquaredLatin", "parenthesized", "negativeCircled"],
-    "Numbers": ["circledDigit", "filledCircledDigit", "doubleCircledDigit", "parenthesizedDigit"]
+    "Gothic & Decorative": ["fraktur", "boldFraktur", "doubleStruck", "smallCaps", "fancyStrong"],
+    "Numbers": ["circledDigit", "filledCircledDigit", "doubleCircledDigit", "parenthesizedDigit", "chemicalNumbers", "subscriptNumbers", "diceNumbers", "kansuuji", "spades", "hearts", "diamonds", "clubs", "mahjongCharacters", "mahjongCircles", "mahjongBamboos"],
+    "Fullwidth & Asian": ["fullwidth", "hiragana", "katakana"]
   },
   "styles": {
+    "plainText": {
+      "name": "Plain Text (元に戻す)",
+      "from": "",
+      "to": ""
+    },
     "bold": {
       "name": "Bold",
       "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
@@ -60,45 +65,10 @@
       "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
       "to": "𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃"
     },
-    "fraktur": {
-      "name": "Fraktur",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-      "to": "𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷"
-    },
-    "boldFraktur": {
-      "name": "Bold Fraktur",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-      "to": "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟"
-    },
-    "doubleStruck": {
-      "name": "Double-Struck",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-      "to": "𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡"
-    },
-    "smallCaps": {
-      "name": "Small Caps",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "to": "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ"
-    },
-    "upsideDown": {
-      "name": "Upside Down",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-      "to": "∀ᗺƆᗡƎℲפHIſʞ˥WNOԀQᴚS⊥∩ΛMX⅄Zɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎz0ƖᄅƐㄣϛ9ㄥ86"
-    },
-    "reversed": {
-      "name": "Reversed (Mirrored)",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-      "to": "ΑᙠƆᗡƎꟻGHIJK⅃MᴎOꟼϘЯꙄTUVWXYZAdↄbɘʇǫʜiįʞ|mᴎoqpɿꙅƚυvwxγz"
-    },
-    "fullwidth": {
-      "name": "Fullwidth",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-      "to": "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９"
-    },
     "circledLatin": {
       "name": "Circled",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-      "to": "ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ"
+      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+      "to": "ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ⓪①②③④⑤⑥⑦⑧⑨"
     },
     "negativeCircled": {
       "name": "Negative Circled",
@@ -118,27 +88,107 @@
     "parenthesized": {
       "name": "Parenthesized",
       "from": "abcdefghijklmnopqrstuvwxyz",
-      "to": "⒜⒝⒞⒟⒠⒡⒢⒣⒤⒥⒦⒧⒨⒩⒪⒫⒬⒭⒮⒯⒰⒱⒲⒳⒴⒵"
+      "to": "⒜⒝⒞⒟⒠⒡⒢⒣⒤⒥⒦⒧⒨⒩⒪⒫⒬⒭⒮⒯⒰⒱⒲⒳⒴⒵⑴⑵⑶⑷⑸⑹⑺⑻⑼"
     },
-    "circledDigit": {
-      "name": "Circled Numbers",
-      "from": "0123456789",
-      "to": "⓪①②③④⑤⑥⑦⑧⑨"
+    "fraktur": {
+      "name": "Fraktur",
+      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+      "to": "𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷"
     },
-    "filledCircledDigit": {
-      "name": "Filled Circled Numbers",
-      "from": "0123456789",
-      "to": "⓿❶❷❸❹❺❻❼❽❾"
+    "boldFraktur": {
+      "name": "Bold Fraktur",
+      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+      "to": "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟"
+    },
+    "doubleStruck": {
+      "name": "Double-Struck",
+      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+      "to": "𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡"
+    },
+    "smallCaps": {
+      "name": "Small Caps",
+      "from": "abcdefghijklmnopqrstuvwxyz",
+      "to": "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ"
+    },
+    "fancyStrong": {
+      "name": "Fancy Strong",
+      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+      "to": "ᗩᗷᑕᗪᕮᖴᘜᕼIᒍKᒪᗰᑎOᑭᑫᖇᔕTᑌᐯᗯ᙭Yᘔค๖¢໓єʄງђเןкɭ๓ຖ໐թ๑гร੮นѵฬχчՀ0123456789"
     },
     "doubleCircledDigit": {
       "name": "Double Circled Numbers",
       "from": "123456789",
       "to": "⓵⓶⓷⓸⓹⓺⓻⓼⓽"
     },
-    "parenthesizedDigit": {
-      "name": "Parenthesized Numbers",
+    "fullwidth": {
+      "name": "Fullwidth",
+      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+      "to": "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９"
+    },
+    "hiragana": {
+      "name": "ひらがな",
+      "from": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん",
+      "to": "ァィゥェォヵキクヶコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロヮヲン"
+    },
+    "katakana": {
+      "name": "カタカナ",
+      "from": "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン",
+      "to": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"
+    },
+    "chemicalNumbers": {
+      "name": "Chemical Numbers",
+      "from": "1234567",
+      "to": "♳♴♵♶♷♸♹"
+    },
+    "subscriptNumbers": {
+      "name": "Subscript Numbers",
+      "from": "0123456789",
+      "to": "₀₁₂₃₄₅₆₇₈₉"
+    },
+    "diceNumbers": {
+      "name": "Dice Numbers",
+      "from": "123456",
+      "to": "⚀⚁⚂⚃⚄⚅"
+    },
+    "kansuuji": {
+      "name": "漢数字 (Circled)",
       "from": "123456789",
-      "to": "⑴⑵⑶⑷⑸⑹⑺⑻⑼"
+      "to": "㊀㊁㊂㊃㊄㊅㊆㊇㊈"
+    },
+    "spades": {
+      "name": "Spades ♠",
+      "from": "0123456789JQK",
+      "to": "🃟🂡🂢🂣🂤🂥🂦🂧🂨🂩🂫🂬🂭"
+    },
+    "hearts": {
+      "name": "Hearts ♥",
+      "from": "0123456789JQK",
+      "to": "🃟🂱🂲🂳🂴🂵🂶🂷🂸🂹🂻🂼🂽"
+    },
+    "diamonds": {
+      "name": "Diamonds ♦",
+      "from": "0123456789JQK",
+      "to": "🃟🃁🃂🃃🃄🃅🃆🃇🃈🃉🃋🃌🃍"
+    },
+    "clubs": {
+      "name": "Clubs ♣",
+      "from": "0123456789JQK",
+      "to": "🃟🃑🃒🃓🃔🃕🃖🃗🃘🃙🃛🃜🃝"
+    },
+    "mahjongCharacters": {
+      "name": "Mahjong Characters 萬",
+      "from": "0123456789",
+      "to": "🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏"
+    },
+    "mahjongCircles": {
+      "name": "Mahjong Circles 筒",
+      "from": "0123456789",
+      "to": "🀆🀙🀚🀛🀜🀝🀞🀟🀠🀡"
+    },
+    "mahjongBamboos": {
+      "name": "Mahjong Bamboos 索",
+      "from": "0123456789",
+      "to": "🀆🀐🀑🀒🀓🀔🀕🀖🀗🀘"
     }
   }
 }

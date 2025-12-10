@@ -99,26 +99,6 @@ function App() {
         {Object.entries(categories).map(([categoryName, styleKeys]) =>
           renderCategory(categoryName, styleKeys)
         )}
-
-        <div className="category-section">
-          <h2 className="category-title">Plain Text</h2>
-          <div className="results-grid">
-            <div
-              className={`result-card ${!inputText ? "empty" : ""}`}
-              title="Plain Text (Original)"
-            >
-              <div className="card-content">{inputText || "Plain text"}</div>
-              <button
-                className={`copy-button ${copiedStyle === "plain" ? "copied" : ""}`}
-                onClick={() => copyToClipboard(inputText, "plain")}
-                title="コピー"
-                disabled={!inputText}
-              >
-                {copiedStyle === "plain" ? "✓" : "📋"}
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

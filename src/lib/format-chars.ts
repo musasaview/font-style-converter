@@ -1,4 +1,4 @@
-// Helper to format characters as "lowercase UPPERCASE 0123456789"
+// Helper to format characters as "UPPERCASE lowercase 0123456789"
 export function formatCharacterSet(from: string, to: string): string {
   const fromChars = Array.from(from);
   const toChars = Array.from(to);
@@ -23,9 +23,9 @@ export function formatCharacterSet(from: string, to: string): string {
   }
   
   const parts = [];
-  if (lowercase.length > 0) parts.push(lowercase.join(''));
   if (uppercase.length > 0) parts.push(uppercase.join(''));
+  if (lowercase.length > 0) parts.push(lowercase.join(''));
   if (digits.length > 0) parts.push(digits.join(''));
-  
+
   return parts.join(' ');
 }
