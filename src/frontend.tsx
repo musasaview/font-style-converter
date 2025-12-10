@@ -1,42 +1,87 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import styles from "./lib/styles.json";
+import data from "./lib/styles.json";
 import { convertText } from "./lib/converter";
+import { formatCharacterSet } from "./lib/format-chars";
 import "./style.css";
 
-type StyleName = keyof typeof styles;
+const { categories, styles } = data;
+
+type StyleKey = keyof typeof styles;
 
 function App() {
   const [inputText, setInputText] = useState("");
   const [copiedStyle, setCopiedStyle] = useState<string | null>(null);
 
-  const convertedResults = Object.entries(styles).map(([styleName, style]) => {
-    const converted = convertText(inputText, style.from, style.to);
-    const hasChange = converted !== inputText;
-    return {
-      styleName: styleName as StyleName,
-      converted,
-      hasChange,
-    };
-  });
-
-  const displayResults = convertedResults.filter((result) => result.hasChange);
-
-  const copyToClipboard = async (text: string, styleName: string) => {
+  const copyToClipboard = async (text: string, styleKey: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedStyle(styleName);
+      setCopiedStyle(styleKey);
       setTimeout(() => setCopiedStyle(null), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
   };
 
+  const renderCategory = (categoryName: string, styleKeys: string[]) => {
+    // Get all character sets for this category
+    const categoryCharSets = styleKeys
+      .map((key) => {
+        const style = styles[key as StyleKey];
+        if (!style) return "";
+        return formatCharacterSet(style.from, style.to);
+      })
+      .filter(Boolean)
+      .join(" ");
+
+    return (
+      <div key={categoryName} className="category-section">
+        <div className="category-header">
+          <h2 className="category-title">{categoryName}</h2>
+          <span className="category-preview">{categoryCharSets}</span>
+        </div>
+        <div className="results-grid">
+          {styleKeys.map((styleKey) => {
+            const style = styles[styleKey as StyleKey];
+            if (!style) return null;
+
+            const converted = convertText(inputText, style.from, style.to);
+            const hasChange = converted !== inputText;
+            const isEmpty = !inputText || !hasChange;
+            const charSet = formatCharacterSet(style.from, style.to);
+
+            return (
+              <div
+                key={styleKey}
+                className={`result-card ${isEmpty ? "empty" : ""}`}
+                title={`${style.name}: ${charSet}`}
+              >
+                <div className="card-content">{converted || inputText}</div>
+                <button
+                  className={`copy-button ${copiedStyle === styleKey ? "copied" : ""}`}
+                  onClick={() => copyToClipboard(converted || inputText, styleKey)}
+                  title="コピー"
+                  disabled={isEmpty}
+                >
+                  {copiedStyle === styleKey ? "✓" : "📋"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container">
       <header className="header">
-        <h1>Unicode Text Converter</h1>
-        <p>様々なUnicode文字スタイルに変換します</p>
+        <h1 className="title">
+          <span className="title-text">Unicode</span>
+          <span className="title-accent">Text</span>
+          <span className="title-text">Converter</span>
+        </h1>
+        <p className="subtitle">様々なUnicode文字スタイルに変換</p>
       </header>
 
       <div className="input-section">
@@ -46,28 +91,34 @@ function App() {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           rows={4}
+          spellCheck={false}
         />
       </div>
 
-      <div className="results-section">
-        {displayResults.length === 0 && inputText && (
-          <div className="no-results">変換可能な文字がありません</div>
+      <div className="categories-container">
+        {Object.entries(categories).map(([categoryName, styleKeys]) =>
+          renderCategory(categoryName, styleKeys)
         )}
-        {displayResults.map((result) => (
-          <div key={result.styleName} className="result-card">
-            <div className="card-header">
-              <span className="style-name">{result.styleName}</span>
+
+        <div className="category-section">
+          <h2 className="category-title">Plain Text</h2>
+          <div className="results-grid">
+            <div
+              className={`result-card ${!inputText ? "empty" : ""}`}
+              title="Plain Text (Original)"
+            >
+              <div className="card-content">{inputText || "Plain text"}</div>
               <button
-                className={`copy-button ${copiedStyle === result.styleName ? 'copied' : ''}`}
-                onClick={() => copyToClipboard(result.converted, result.styleName)}
+                className={`copy-button ${copiedStyle === "plain" ? "copied" : ""}`}
+                onClick={() => copyToClipboard(inputText, "plain")}
                 title="コピー"
+                disabled={!inputText}
               >
-                {copiedStyle === result.styleName ? '✓' : '📋'}
+                {copiedStyle === "plain" ? "✓" : "📋"}
               </button>
             </div>
-            <div className="card-content">{result.converted}</div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
