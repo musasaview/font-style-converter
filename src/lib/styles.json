@@ -1,13 +1,13 @@
 {
   "categories": {
-    "Plain Text": ["plainText"],
     "Serif Styles": ["bold", "italic", "boldItalic"],
     "Sans-Serif Styles": ["sans", "sansBold", "sansItalic", "sansBoldItalic"],
     "Monospace & Script": ["mono", "script", "boldScript"],
     "Enclosed Characters": ["circledLatin", "squaredLatin", "negativeSquaredLatin", "parenthesized", "negativeCircled"],
-    "Gothic & Decorative": ["fraktur", "boldFraktur", "doubleStruck", "smallCaps", "fancyStrong"],
+    "Gothic & Decorative": ["doubleStruck", "smallCaps", "fancyStrong", "fraktur", "boldFraktur"],
     "Numbers": ["circledDigit", "filledCircledDigit", "doubleCircledDigit", "parenthesizedDigit", "chemicalNumbers", "subscriptNumbers", "diceNumbers", "kansuuji", "spades", "hearts", "diamonds", "clubs", "mahjongCharacters", "mahjongCircles", "mahjongBamboos"],
-    "Fullwidth & Asian": ["fullwidth", "hiragana", "katakana"]
+    "Half-width & Full-width": ["halfwidth", "fullwidth"],
+    "Plain Text": ["plainText"]
   },
   "styles": {
     "plainText": {
@@ -121,19 +121,14 @@
       "to": "⓵⓶⓷⓸⓹⓺⓻⓼⓽"
     },
     "fullwidth": {
-      "name": "Fullwidth",
-      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-      "to": "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９"
+      "name": "全角 (Full-width)",
+      "from": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｶｹｯｬｭｮﾜ",
+      "to": "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォヵヶッャュョヮ"
     },
-    "hiragana": {
-      "name": "ひらがな",
-      "from": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん",
-      "to": "ァィゥェォヵキクヶコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロヮヲン"
-    },
-    "katakana": {
-      "name": "カタカナ",
-      "from": "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン",
-      "to": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん"
+    "halfwidth": {
+      "name": "半角 (Half-width)",
+      "from": "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォヵヶッャュョヮＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９",
+      "to": "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｶｹｯｬｭｮﾜABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
     },
     "chemicalNumbers": {
       "name": "Chemical Numbers",
