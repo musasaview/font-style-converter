@@ -5,6 +5,9 @@ import {
   halfWidth,
   addHalfwidthDakutenToAll,
   addCombiningDakutenToAll,
+  toUpperCase,
+  toLowerCase,
+  toggleCase,
 } from "./lib/converter";
 import stylesData from "./lib/styles.json";
 
@@ -36,6 +39,18 @@ export function TextConverter() {
 
   const handleAddHalfDakuten = () => {
     setOutputText(addHalfwidthDakutenToAll(inputText));
+  };
+
+  const handleUpperCase = () => {
+    setOutputText(toUpperCase(inputText));
+  };
+
+  const handleLowerCase = () => {
+    setOutputText(toLowerCase(inputText));
+  };
+
+  const handleToggleCase = () => {
+    setOutputText(toggleCase(inputText));
   };
 
   const copyToClipboard = async () => {
@@ -82,6 +97,24 @@ export function TextConverter() {
               className="bg-[#fbf0df] text-[#1a1a1a] border-0 px-4 py-2 rounded-lg font-bold transition-all duration-100 hover:bg-[#f3d5a3] hover:-translate-y-px cursor-pointer"
             >
               半角濁点追加 (Add Half Dakuten)
+            </button>
+            <button
+              onClick={handleUpperCase}
+              className="bg-[#fbf0df] text-[#1a1a1a] border-0 px-4 py-2 rounded-lg font-bold transition-all duration-100 hover:bg-[#f3d5a3] hover:-translate-y-px cursor-pointer"
+            >
+              大文字 (UPPERCASE)
+            </button>
+            <button
+              onClick={handleLowerCase}
+              className="bg-[#fbf0df] text-[#1a1a1a] border-0 px-4 py-2 rounded-lg font-bold transition-all duration-100 hover:bg-[#f3d5a3] hover:-translate-y-px cursor-pointer"
+            >
+              小文字 (lowercase)
+            </button>
+            <button
+              onClick={handleToggleCase}
+              className="bg-[#fbf0df] text-[#1a1a1a] border-0 px-4 py-2 rounded-lg font-bold transition-all duration-100 hover:bg-[#f3d5a3] hover:-translate-y-px cursor-pointer"
+            >
+              大小反転 (tOGGLE cASE)
             </button>
           </div>
 
