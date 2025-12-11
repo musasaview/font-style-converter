@@ -282,6 +282,29 @@ body {
   background: rgba(34, 197, 94, 0.15);
 }
 
+/* Footer */
+.footer {
+  margin-top: 60px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.footer-content {
+  font-size: 0.9rem;
+  color: rgba(44, 95, 122, 0.6);
+}
+
+.footer-link {
+  color: rgba(44, 95, 122, 0.7);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #2c5f7a;
+  text-decoration: underline;
+}
+
 /* Responsive Typography */
 @media (max-width: 768px) {
   .title {
@@ -309,5 +332,14 @@ body {
 
   .card-content {
     font-size: 1rem;
+  }
+
+  .footer {
+    margin-top: 40px;
+    padding: 20px 0;
+  }
+
+  .footer-content {
+    font-size: 0.85rem;
   }
 }

@@ -179,6 +179,29 @@ function App() {
           </div>
         </div>
       </div>
+
+      <footer className="footer">
+        <div className="footer-content">
+          made by むささびゅ •{" "}
+          <a
+            href="https://x.com/musasaview"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            @musasaview
+          </a>
+          {" "}•{" "}
+          <a
+            href="https://github.com/musasaview/font-style-converter"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            github
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
