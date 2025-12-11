@@ -40,11 +40,29 @@ body {
 }
 
 .title-accent {
+  position: relative;
+  display: inline-block;
   background: linear-gradient(135deg, #4a90a4 0%, #2c5f7a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  position: relative;
+}
+
+.title-accent::before {
+  content: 'font-style-coverter';
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-text-stroke: 2px rgba(0, 0, 0, 0.2);
+  color: transparent;
+  clip-path: inset(0 100% 0 0);
+  animation: drawStroke 0.2s ease-out forwards;
+}
+
+@keyframes drawStroke {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
 .subtitle {
@@ -101,6 +119,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
