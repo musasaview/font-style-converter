@@ -114,7 +114,7 @@ function App() {
     <div className="container">
       <header className="header">
         <h1 className="title">
-          <span className="title-accent">font-style-coverter</span>
+          <span className="title-accent">font-style-converter</span>
         </h1>
         <p className="subtitle">主に英数字をナナメにしたり太字にしたり、濁点つけたり</p>
       </header>

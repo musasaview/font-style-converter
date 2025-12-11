@@ -49,7 +49,7 @@ body {
 }
 
 .title-accent::before {
-  content: 'font-style-coverter';
+  content: 'font-style-converter';
   position: absolute;
   top: 0;
   left: 0;
