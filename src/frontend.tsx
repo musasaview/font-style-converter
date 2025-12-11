@@ -13,6 +13,7 @@ import {
   convertToPlainText,
 } from "./lib/converter";
 import { formatCharacterSet } from "./lib/format-chars";
+import { FaXTwitter, FaGithub } from "react-icons/fa6";
 import "./style.css";
 
 const { categories, styles } = data;
@@ -182,24 +183,27 @@ function App() {
 
       <footer className="footer">
         <div className="footer-content">
-          made by むささびゅ •{" "}
-          <a
-            href="https://x.com/musasaview"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            @musasaview
-          </a>
-          {" "}•{" "}
-          <a
-            href="https://github.com/musasaview/font-style-converter"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            github
-          </a>
+          <div className="footer-text" title="made by musasaview">𝚖𝚊𝚍𝚎 𝚋𝚢 ⓂⓊⓈⒶⓈⒶⓋⒾⒺⓌ</div>
+          <div className="footer-links">
+            <a
+              href="https://x.com/musasaview"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-icon-link"
+              title="Twitter / X"
+            >
+              <FaXTwitter size={20} />
+            </a>
+            <a
+              href="https://github.com/musasaview/font-style-converter"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-icon-link"
+              title="GitHub"
+            >
+              <FaGithub size={20} />
+            </a>
+          </div>
         </div>
       </footer>
     </div>
