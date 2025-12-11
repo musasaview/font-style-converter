@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import data from "./lib/styles.json";
 import {
@@ -22,6 +22,11 @@ type StyleKey = keyof typeof styles;
 function App() {
   const [inputText, setInputText] = useState("El Psy Kongroo. 1.048596");
   const [copiedStyle, setCopiedStyle] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, []);
 
   const copyToClipboard = async (text: string, styleKey: string) => {
     try {
@@ -120,14 +125,29 @@ function App() {
       </header>
 
       <div className="input-section">
-        <textarea
-          className="input-textarea"
-          placeholder="テキストを入力してください..."
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          rows={4}
-          spellCheck={false}
-        />
+        <div className="textarea-wrapper">
+          <textarea
+            ref={textareaRef}
+            className="input-textarea"
+            placeholder="テキストを入力してください..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            rows={4}
+            spellCheck={false}
+          />
+          {inputText && (
+            <button
+              className="clear-button"
+              onClick={() => {
+                setInputText("");
+                textareaRef.current?.focus();
+              }}
+              title="クリア"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="categories-container">

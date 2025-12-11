@@ -79,10 +79,16 @@ body {
   justify-content: center;
 }
 
-.input-textarea {
+.textarea-wrapper {
+  position: relative;
   width: 100%;
   max-width: 700px;
+}
+
+.input-textarea {
+  width: 100%;
   padding: 20px;
+  padding-right: 50px;
   font-size: 1.1rem;
   border: 2px solid rgba(74, 144, 164, 0.2);
   border-radius: 16px;
@@ -101,6 +107,35 @@ body {
 
 .input-textarea::placeholder {
   color: #999;
+}
+
+.clear-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(74, 144, 164, 0.1);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: #4a90a4;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.clear-button:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+.clear-button:active {
+  transform: scale(0.95);
 }
 
 /* Categories Container */
