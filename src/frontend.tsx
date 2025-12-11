@@ -20,7 +20,7 @@ const { categories, styles } = data;
 type StyleKey = keyof typeof styles;
 
 function App() {
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText] = useState("El Psy Kongroo. 1.048596");
   const [copiedStyle, setCopiedStyle] = useState<string | null>(null);
 
   const copyToClipboard = async (text: string, styleKey: string) => {
