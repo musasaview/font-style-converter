@@ -5,8 +5,7 @@
     "Monospace & Script": ["mono", "script", "boldScript"],
     "Enclosed Characters": ["circledLatin", "squaredLatin", "negativeSquaredLatin", "parenthesized", "negativeCircled"],
     "Gothic & Decorative": ["doubleStruck", "smallCaps", "fancyStrong", "fraktur", "boldFraktur"],
-    "Numbers": ["circledDigit", "filledCircledDigit", "doubleCircledDigit", "parenthesizedDigit", "chemicalNumbers", "subscriptNumbers", "diceNumbers", "kansuuji", "spades", "hearts", "diamonds", "clubs", "mahjongCharacters", "mahjongCircles", "mahjongBamboos"],
-    "Plain Text": ["plainText"]
+    "Numbers": ["circledDigit", "filledCircledDigit", "doubleCircledDigit", "parenthesizedDigit", "chemicalNumbers", "subscriptNumbers", "diceNumbers", "kansuuji", "spades", "hearts", "diamonds", "clubs", "mahjongCharacters", "mahjongCircles", "mahjongBamboos"]
   },
   "styles": {
     "plainText": {

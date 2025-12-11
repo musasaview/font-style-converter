@@ -7,6 +7,10 @@ import {
   halfWidth,
   addHalfwidthDakutenToAll,
   addCombiningDakutenToAll,
+  toUpperCase,
+  toLowerCase,
+  toggleCase,
+  convertToPlainText,
 } from "./lib/converter";
 import { formatCharacterSet } from "./lib/format-chars";
 import "./style.css";
@@ -75,7 +79,10 @@ function App() {
             const style = styles[styleKey as StyleKey];
             if (!style) return null;
 
-            const converted = convertText(inputText, style.from, style.to);
+            // Plain Textスタイルの場合は専用関数を使用
+            const converted = styleKey === 'plainText'
+              ? convertToPlainText(inputText)
+              : convertText(inputText, style.from, style.to);
             const hasChange = converted !== inputText;
             const isEmpty = !inputText || !hasChange;
             const charSet = formatCharacterSet(style.from, style.to);
@@ -127,6 +134,18 @@ function App() {
         {Object.entries(categories).map(([categoryName, styleKeys]) =>
           renderCategory(categoryName, styleKeys)
         )}
+        <div className="category-section">
+          <div className="category-header">
+            <h2 className="category-title">Plain Text</h2>
+            <span className="category-preview">元の文字列, 大文字・小文字変換</span>
+          </div>
+          <div className="results-grid">
+            {renderFunctionCard("Plain Text (元に戻す)", convertToPlainText, "plaintext")}
+            {renderFunctionCard("大文字 (UPPERCASE)", toUpperCase, "uppercase")}
+            {renderFunctionCard("小文字 (lowercase)", toLowerCase, "lowercase")}
+            {renderFunctionCard("大小反転 (tOGGLE cASE)", toggleCase, "togglecase")}
+          </div>
+        </div>
         <div className="category-section">
           <div className="category-header">
             <h2 className="category-title">Width & Dakuten</h2>
