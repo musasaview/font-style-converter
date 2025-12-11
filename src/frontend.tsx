@@ -107,11 +107,9 @@ function App() {
     <div className="container">
       <header className="header">
         <h1 className="title">
-          <span className="title-text">Unicode</span>
-          <span className="title-accent">Text</span>
-          <span className="title-text">Converter</span>
+          <span className="title-text">英数字とかの見た目変えるやつ</span>
         </h1>
-        <p className="subtitle">様々なUnicode文字スタイルに変換</p>
+        <p className="subtitle">主に英数字をナナメにしたり太字にしたり、濁点つけたり</p>
       </header>
 
       <div className="input-section">
