@@ -5,14 +5,29 @@ import { INVERSE_MAPS } from './character-maps';
 const COMBINING_DAKUTEN = '\u3099';
 const HALFWIDTH_DAKUTEN = '\uFF9E';
 
+/**
+ * Escape special regex characters
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function convertText(input: string, charMap: CharacterMap): string {
   if (!input) return input;
 
   const normalized = input.normalize('NFKC');
 
-  return Array.from(normalized)
-    .map(char => charMap[char] ?? char)
-    .join('');
+  // Sort keys by length (longest first) for greedy matching
+  const sortedKeys = Object.keys(charMap).sort((a, b) => b.length - a.length);
+
+  // Create regex pattern from all keys
+  const pattern = new RegExp(
+    sortedKeys.map(key => escapeRegex(key)).join('|'),
+    'g'
+  );
+
+  // Replace all matches using the character map
+  return normalized.replace(pattern, match => charMap[match] ?? match);
 }
 
 export function convertToPlainText(input: string): string {
