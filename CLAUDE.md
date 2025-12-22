@@ -1,106 +1,95 @@
+# font-style-converter プロジェクト
 
-Default to using Bun instead of Node.js.
+このプロジェクトはBunを使用したReactフロントエンドアプリケーションです。英数字の見た目を様々なスタイルに変換するWebツールを提供しています。
+
+## プロジェクト概要
+
+- **目的**: 文字列の見た目を変換するツール(Bold, Italic, Circledなど様々なUnicodeスタイル)
+- **技術スタック**: Bun + React 19 + TypeScript + Tailwind CSS
+- **特徴**: 完全クライアントサイド処理(サーバーに送信しない)
+
+## 開発環境
+
+### 基本コマンド
+
+- `bun --hot src/index.ts` - 開発サーバー起動(HMR有効)
+- `bun test` - テスト実行
+- `bun run build` - プロダクションビルド
+
+### Bunの使用
+
+Default to using Bun instead of Node.js:
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
 - Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Use `bunx <package> <command>` instead of `npx <package> <command>`
-- Bun automatically loads .env, so don't use dotenv.
+- Use `bun install` instead of `npm install`
+- Use `bun run <script>` instead of `npm run <script>`
 
-## APIs
+## プロジェクト構造
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
-
-## Testing
-
-Use `bun test` to run tests.
-
-```ts#index.test.ts
-import { test, expect } from "bun:test";
-
-test("hello world", () => {
-  expect(1).toBe(1);
-});
+```
+src/
+├── index.html          # エントリーポイントHTML
+├── index.ts            # Bun.serve()サーバー設定
+├── frontend.tsx        # Reactアプリケーション本体
+├── style.css           # スタイルシート(Tailwind CSS)
+└── lib/
+    ├── character-maps.ts   # 文字変換マップとスタイル定義
+    ├── converter.ts        # 文字変換ロジック
+    └── converter.test.ts   # テストコード
 ```
 
-## Frontend
+## サーバー設定 (src/index.ts)
 
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
-
-Server:
-
-```ts#index.ts
-import index from "./index.html"
+```ts
+import index from "./index.html";
 
 Bun.serve({
   routes: {
     "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
   },
   development: {
-    hmr: true,
-    console: true,
-  }
-})
+    hmr: true,      // Hot Module Reloadingを有効化
+    console: true,  // ブラウザコンソール出力
+  },
+  port: 3000,
+});
 ```
 
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
+## フロントエンド
 
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
+HTMLファイルから直接`.tsx`ファイルをインポートし、Bunの組み込みバンドラーが自動的にトランスパイル・バンドルします。
+
+```html
+<div id="root"></div>
+<script type="module" src="./frontend.tsx"></script>
 ```
 
-With the following `frontend.tsx`:
+## テスト
 
-```tsx#frontend.tsx
-import React from "react";
-import { createRoot } from "react-dom/client";
+`bun:test`を使用:
 
-// import .css files directly and it works
-import './index.css';
+```ts
+import { test, expect } from "bun:test";
 
-const root = createRoot(document.body);
-
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
-
-root.render(<Frontend />);
+test("convertText converts characters correctly", () => {
+  const result = convertText("ABC", STYLES.bold);
+  expect(result).toBe("𝐀𝐁𝐂");
+});
 ```
 
-Then, run index.ts
+## 主要な機能
 
-```sh
-bun --hot ./index.ts
-```
+1. **文字スタイル変換**: Bold, Italic, Script, Fraktur, Monospace, Sans-serif, Double-struck, Circledなど
+2. **ケース変換**: 大文字/小文字/反転
+3. **幅変換**: 全角/半角
+4. **濁点追加**: 結合文字/半角濁点
+5. **改行対応**: 複数行テキストの変換に対応(各行ごとに処理)
 
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+## 依存関係
+
+- `react` & `react-dom`: ^19
+- `conv-str-width`: 全角半角変換(カスタムフォーク版)
+- `react-icons`: アイコン
+- `tailwindcss`: ^4.1.11
+- `bun-plugin-tailwind`: Tailwind CSS統合
