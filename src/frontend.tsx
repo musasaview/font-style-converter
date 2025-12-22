@@ -208,7 +208,7 @@ function App() {
 
       <footer className="footer">
         <div className="footer-content">
-          <div className="footer-text" title="made by musasaview">𝚖𝚊𝚍𝚎 𝚋𝚢 ⓂⓊⓈⒶⓈⒶⓋⒾⒺⓌ</div>
+          <div className="footer-text" title="made by musasaview">𝚖𝚊𝚍𝚎 𝚋𝚢 𝚖𝚞𝚜𝚊𝚜𝚊𝚟𝚒𝚎𝚠</div>
           <div className="footer-links">
             <a
               href="https://x.com/musasaview"
