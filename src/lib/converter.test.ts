@@ -8,7 +8,6 @@ import {
   addHalfwidthDakutenToAll,
   toUpperCase,
   toLowerCase,
-  toggleCase,
 } from "./converter";
 import { STYLES } from "./character-maps";
 
@@ -124,22 +123,9 @@ describe("case conversion functions", () => {
     expect(toLowerCase("𝐇𝐄𝐋𝐋𝐎")).toBe("hello");
   });
 
-  test("toggleCase toggles case", () => {
-    expect(toggleCase("Hello")).toBe("hELLO");
-  });
-
-  test("toggleCase handles styled text", () => {
-    expect(toggleCase("𝐇𝐞𝐥𝐥𝐨")).toBe("hELLO");
-  });
-
-  test("toggleCase preserves non-alphabetic characters", () => {
-    expect(toggleCase("Hello World 123")).toBe("hELLO wORLD 123");
-  });
-
   test("case functions handle empty strings", () => {
     expect(toUpperCase("")).toBe("");
     expect(toLowerCase("")).toBe("");
-    expect(toggleCase("")).toBe("");
   });
 });
 

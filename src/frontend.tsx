@@ -9,7 +9,6 @@ import {
   addCombiningDakutenToAll,
   toUpperCase,
   toLowerCase,
-  toggleCase,
   convertToPlainText,
 } from "./lib/converter";
 import { FaXTwitter, FaGithub } from "react-icons/fa6";
@@ -27,7 +26,6 @@ const FUNCTION_CARDS: FunctionCard[] = [
   { name: "Plain Text (元に戻す)", key: "plaintext", fn: convertToPlainText },
   { name: "大文字 (UPPERCASE)", key: "uppercase", fn: toUpperCase },
   { name: "小文字 (lowercase)", key: "lowercase", fn: toLowerCase },
-  { name: "大小反転 (tOGGLE cASE)", key: "togglecase", fn: toggleCase },
 ];
 
 const WIDTH_DAKUTEN_CARDS: FunctionCard[] = [

@@ -59,19 +59,3 @@ export function toLowerCase(str: string): string {
   const plainText = convertToPlainText(str);
   return plainText.toLowerCase();
 }
-
-export function toggleCase(str: string): string {
-  const plainText = convertToPlainText(str);
-  return Array.from(plainText).map(char => {
-    const upper = char.toUpperCase();
-    const lower = char.toLowerCase();
-
-    if (char === upper && char !== lower) {
-      return lower;
-    }
-    if (char === lower && char !== upper) {
-      return upper;
-    }
-    return char;
-  }).join('');
-}
