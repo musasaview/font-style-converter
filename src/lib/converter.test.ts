@@ -34,6 +34,23 @@ describe("convertText", () => {
   test("converts full alphabet with numbers", () => {
     expect(convertText("Hello World 123", STYLES.Bold)).toBe("𝐇𝐞𝐥𝐥𝐨 𝐖𝐨𝐫𝐥𝐝 𝟏𝟐𝟑");
   });
+
+  test("preserves newlines in single line break", () => {
+    const charMap = { A: '𝐀', B: '𝐁', C: '𝐂' };
+    expect(convertText("ABC\nDEF", charMap)).toBe("𝐀𝐁𝐂\nDEF");
+  });
+
+  test("preserves newlines in multiple lines", () => {
+    const input = "Hello\nWorld\n123";
+    const expected = "𝐇𝐞𝐥𝐥𝐨\n𝐖𝐨𝐫𝐥𝐝\n𝟏𝟐𝟑";
+    expect(convertText(input, STYLES.Bold)).toBe(expected);
+  });
+
+  test("handles empty lines", () => {
+    const input = "ABC\n\nDEF";
+    const charMap = { A: '𝐀', B: '𝐁', C: '𝐂', D: '𝐃', E: '𝐄', F: '𝐅' };
+    expect(convertText(input, charMap)).toBe("𝐀𝐁𝐂\n\n𝐃𝐄𝐅");
+  });
 });
 
 describe("convertToPlainText", () => {
@@ -105,6 +122,26 @@ describe("dakuten functions", () => {
   test("addHalfwidthDakutenToAll handles empty string", () => {
     expect(addHalfwidthDakutenToAll("")).toBe("");
   });
+
+  test("addCombiningDakutenToAll preserves newlines", () => {
+    const result = addCombiningDakutenToAll("AB\nCD");
+    expect(result).toBe("A\u3099B\u3099\nC\u3099D\u3099");
+  });
+
+  test("addHalfwidthDakutenToAll preserves newlines", () => {
+    const result = addHalfwidthDakutenToAll("AB\nCD");
+    expect(result).toBe("A\uFF9EB\uFF9E\nC\uFF9ED\uFF9E");
+  });
+
+  test("addCombiningDakutenToAll skips spaces", () => {
+    const result = addCombiningDakutenToAll("AB CD");
+    expect(result).toBe("A\u3099B\u3099 C\u3099D\u3099");
+  });
+
+  test("addHalfwidthDakutenToAll skips spaces", () => {
+    const result = addHalfwidthDakutenToAll("AB CD");
+    expect(result).toBe("A\uFF9EB\uFF9E C\uFF9ED\uFF9E");
+  });
 });
 
 describe("case conversion functions", () => {
@@ -140,6 +177,18 @@ describe("case conversion functions", () => {
     expect(toUpperCase("")).toBe("");
     expect(toLowerCase("")).toBe("");
     expect(toggleCase("")).toBe("");
+  });
+
+  test("toggleCase preserves newlines", () => {
+    expect(toggleCase("Hello\nWorld")).toBe("hELLO\nwORLD");
+  });
+
+  test("toUpperCase preserves newlines", () => {
+    expect(toUpperCase("hello\nworld")).toBe("HELLO\nWORLD");
+  });
+
+  test("toLowerCase preserves newlines", () => {
+    expect(toLowerCase("HELLO\nWORLD")).toBe("hello\nworld");
   });
 });
 

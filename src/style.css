@@ -249,6 +249,7 @@ body {
   line-height: 1.5;
   padding-right: 12px;
   overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .copy-button {

@@ -39,11 +39,15 @@ export function halfWidth(str: string): string {
 }
 
 export function addCombiningDakutenToAll(str: string): string {
-  return Array.from(str.normalize('NFKC')).map(char => char + COMBINING_DAKUTEN).join('');
+  return Array.from(str.normalize('NFKC')).map(char =>
+    char === '\n' || char === ' ' ? char : char + COMBINING_DAKUTEN
+  ).join('');
 }
 
 export function addHalfwidthDakutenToAll(str: string): string {
-  return Array.from(str.normalize('NFKC')).map(char => char + HALFWIDTH_DAKUTEN).join('');
+  return Array.from(str.normalize('NFKC')).map(char =>
+    char === '\n' || char === ' ' ? char : char + HALFWIDTH_DAKUTEN
+  ).join('');
 }
 
 export function toUpperCase(str: string): string {
