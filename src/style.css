@@ -77,6 +77,11 @@ body {
   margin-bottom: 40px;
   display: flex;
   justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 20px 0;
+  background: linear-gradient(135deg, #a8d8ea 0%, #d4f1f4 50%, #b8e6f0 100%);
 }
 
 .textarea-wrapper {
