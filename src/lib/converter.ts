@@ -1,79 +1,73 @@
 import { toHalf, toFull } from 'conv-str-width';
-import stylesData from './styles.json';
+import type { CharacterMap } from './character-maps';
+import { INVERSE_MAPS } from './character-maps';
 
-export function convertText(input: string, from: string, to: string): string {
-  const fromChars = Array.from(from);
-  const toChars = Array.from(to);
+const COMBINING_DAKUTEN = '\u3099';
+const HALFWIDTH_DAKUTEN = '\uFF9E';
 
-  let result = input;
-  for (let i = 0; i < fromChars.length; i++) {
-    const fromChar = fromChars[i];
-    const toChar = toChars[i];
-    if (fromChar && toChar) {
-      result = result.replaceAll(fromChar, toChar);
-    }
-  }
-  return result;
+export function convertText(input: string, charMap: CharacterMap): string {
+  if (!input) return input;
+
+  const normalized = input.normalize('NFKC');
+
+  return Array.from(normalized)
+    .map(char => charMap[char] ?? char)
+    .join('');
 }
 
 export function convertToPlainText(input: string): string {
-  let result = input;
+  if (!input) return input;
 
-  // すべてのスタイルの to → from への変換を適用
-  Object.values(stylesData.styles).forEach(style => {
-    if (style.from && style.to) {
-      result = convertText(result, style.to, style.from);
-    }
-  });
+  let result = input.normalize('NFKC');
 
-  // Unicode結合文字（ダイアクリティカルマークなど）を削除
-  // 結合文字の範囲: U+0300-U+036F (Combining Diacritical Marks)
-  // U+1AB0-U+1AFF, U+1DC0-U+1DFF, U+20D0-U+20FF, U+FE20-U+FE2F
-  // U+3099-U+309A (濁点・半濁点), U+FF9E-U+FF9F (半角濁点・半濁点)
-  result = result.normalize('NFD').replace(/[\u0300-\u036f\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f\u3099-\u309a\uff9e-\uff9f]/g, '');
+  const sortedInverseMaps = Object.entries(INVERSE_MAPS)
+    .sort((a, b) => Object.keys(b[1]).length - Object.keys(a[1]).length);
+
+  for (const [, inverseMap] of sortedInverseMaps) {
+    result = convertText(result, inverseMap);
+  }
 
   return result;
 }
 
-export function halfWidth(str: string) {
-  return toHalf(str);
+export function fullWidth(str: string): string {
+  return toFull(str.normalize('NFKC'));
 }
 
-export function fullWidth(str: string) {
-  return toFull(str);
-}
-
-export function addHalfwidthDakutenToAll(str: string): string {
-  const HALF_DAKUTEN = '\uFF9E';
-  return Array.from(str).map(ch => ch + HALF_DAKUTEN).join('');
+export function halfWidth(str: string): string {
+  return toHalf(str.normalize('NFKC'));
 }
 
 export function addCombiningDakutenToAll(str: string): string {
-  const COMBINING_DAKUTEN = '\u3099';
-  return Array.from(str).map(ch => ch + COMBINING_DAKUTEN).join('');
+  return Array.from(str.normalize('NFKC')).map(char => char + COMBINING_DAKUTEN).join('');
+}
+
+export function addHalfwidthDakutenToAll(str: string): string {
+  return Array.from(str.normalize('NFKC')).map(char => char + HALFWIDTH_DAKUTEN).join('');
 }
 
 export function toUpperCase(str: string): string {
-  // まずplain textに変換してから大文字化
   const plainText = convertToPlainText(str);
   return plainText.toUpperCase();
 }
 
 export function toLowerCase(str: string): string {
-  // まずplain textに変換してから小文字化
   const plainText = convertToPlainText(str);
   return plainText.toLowerCase();
 }
 
 export function toggleCase(str: string): string {
-  // まずplain textに変換してから大小反転
   const plainText = convertToPlainText(str);
-  return Array.from(plainText).map(ch => {
-    if (ch === ch.toUpperCase() && ch !== ch.toLowerCase()) {
-      return ch.toLowerCase();
-    } else if (ch === ch.toLowerCase() && ch !== ch.toUpperCase()) {
-      return ch.toUpperCase();
+  return Array.from(plainText).map(char => {
+    const upper = char.toUpperCase();
+    const lower = char.toLowerCase();
+
+    if (char === upper && char !== lower) {
+      return lower;
     }
-    return ch;
+    if (char === lower && char !== upper) {
+      return upper;
+    }
+    return char;
   }).join('');
 }

@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { createRoot } from "react-dom/client";
-import data from "./lib/styles.json";
+import { STYLES, CATEGORIES } from "./lib/character-maps";
 import {
   convertText,
   fullWidth,
@@ -12,13 +12,53 @@ import {
   toggleCase,
   convertToPlainText,
 } from "./lib/converter";
-import { formatCharacterSet } from "./lib/format-chars";
 import { FaXTwitter, FaGithub } from "react-icons/fa6";
 import "./style.css";
 
-const { categories, styles } = data;
+type StyleKey = keyof typeof STYLES;
 
-type StyleKey = keyof typeof styles;
+interface FunctionCard {
+  name: string;
+  key: string;
+  fn: (str: string) => string;
+}
+
+const FUNCTION_CARDS: FunctionCard[] = [
+  { name: "Plain Text (元に戻す)", key: "plaintext", fn: convertToPlainText },
+  { name: "大文字 (UPPERCASE)", key: "uppercase", fn: toUpperCase },
+  { name: "小文字 (lowercase)", key: "lowercase", fn: toLowerCase },
+  { name: "大小反転 (tOGGLE cASE)", key: "togglecase", fn: toggleCase },
+];
+
+const WIDTH_DAKUTEN_CARDS: FunctionCard[] = [
+  { name: "全角 (Full Width)", key: "fullwidth", fn: fullWidth },
+  { name: "半角 (Half Width)", key: "halfwidth", fn: halfWidth },
+  { name: "濁点追加 (Add Dakuten)", key: "dakuten", fn: addCombiningDakutenToAll },
+  { name: "半角濁点追加 (Add Half Dakuten)", key: "half-dakuten", fn: addHalfwidthDakutenToAll },
+];
+
+function formatCharacterSet(charMap: Record<string, string>): string {
+  const lowercase: string[] = [];
+  const uppercase: string[] = [];
+  const digits: string[] = [];
+
+  Object.entries(charMap).forEach(([from, to]) => {
+    if (/[a-z]/.test(from)) {
+      lowercase.push(to);
+    } else if (/[A-Z]/.test(from)) {
+      uppercase.push(to);
+    } else if (/[0-9]/.test(from)) {
+      digits.push(to);
+    }
+  });
+
+  const parts = [];
+  if (uppercase.length > 0) parts.push(uppercase.join(''));
+  if (lowercase.length > 0) parts.push(lowercase.join(''));
+  if (digits.length > 0) parts.push(digits.join(''));
+
+  return parts.join(' ');
+}
 
 function App() {
   const [inputText, setInputText] = useState("El Psy Kongroo. 1.048596");
@@ -39,82 +79,62 @@ function App() {
     }
   };
 
-  const renderFunctionCard = (name: string, fn: (str: string) => string, key: string) => {
-    const converted = fn(inputText);
+  const handleClearInput = () => {
+    setInputText("");
+    textareaRef.current?.focus();
+  };
+
+  const renderResultCard = (
+    converted: string,
+    styleKey: string,
+    styleName: string,
+    charSet?: string
+  ) => {
     const hasChange = converted !== inputText;
     const isEmpty = !inputText || !hasChange;
+    const title = charSet ? `${styleName}: ${charSet}` : styleName;
 
     return (
       <div
-        key={key}
+        key={styleKey}
         className={`result-card ${isEmpty ? "empty" : ""}`}
-        title={name}
+        title={title}
       >
         <div className="card-content">{converted || inputText}</div>
         <button
-          className={`copy-button ${copiedStyle === key ? "copied" : ""}`}
-          onClick={() => copyToClipboard(converted || inputText, key)}
+          className={`copy-button ${copiedStyle === styleKey ? "copied" : ""}`}
+          onClick={() => copyToClipboard(converted || inputText, styleKey)}
           title="コピー"
           disabled={isEmpty}
         >
-          {copiedStyle === key ? "✓" : "📋"}
+          {copiedStyle === styleKey ? "✓" : "📋"}
         </button>
       </div>
     );
   };
 
-  const renderCategory = (categoryName: string, styleKeys: string[]) => {
-    // Get all character sets for this category
-    const categoryCharSets = styleKeys
-      .map((key) => {
-        const style = styles[key as StyleKey];
-        if (!style) return "";
-        return formatCharacterSet(style.from, style.to);
-      })
-      .filter(Boolean)
-      .join(" ");
+  const renderFunctionCards = (cards: FunctionCard[]) => (
+    <div className="results-grid">
+      {cards.map(({ name, key, fn }) => {
+        const converted = fn(inputText);
+        return renderResultCard(converted, key, name);
+      })}
+    </div>
+  );
 
-    return (
-      <div key={categoryName} className="category-section">
-        <div className="category-header">
-          <h2 className="category-title">{categoryName}</h2>
-          <span className="category-preview">{categoryCharSets}</span>
-        </div>
-        <div className="results-grid">
-          {styleKeys.map((styleKey) => {
-            const style = styles[styleKey as StyleKey];
-            if (!style) return null;
-
-            // Plain Textスタイルの場合は専用関数を使用
-            const converted = styleKey === 'plainText'
-              ? convertToPlainText(inputText)
-              : convertText(inputText, style.from, style.to);
-            const hasChange = converted !== inputText;
-            const isEmpty = !inputText || !hasChange;
-            const charSet = formatCharacterSet(style.from, style.to);
-
-            return (
-              <div
-                key={styleKey}
-                className={`result-card ${isEmpty ? "empty" : ""}`}
-                title={`${style.name}: ${charSet}`}
-              >
-                <div className="card-content">{converted || inputText}</div>
-                <button
-                  className={`copy-button ${copiedStyle === styleKey ? "copied" : ""}`}
-                  onClick={() => copyToClipboard(converted || inputText, styleKey)}
-                  title="コピー"
-                  disabled={isEmpty}
-                >
-                  {copiedStyle === styleKey ? "✓" : "📋"}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
+  const categoryPreview = useMemo(() => {
+    const previews: Record<string, string> = {};
+    Object.entries(CATEGORIES).forEach(([categoryName, styleKeys]) => {
+      previews[categoryName] = styleKeys
+        .map(key => {
+          const charMap = STYLES[key as StyleKey];
+          return charMap ? formatCharacterSet(charMap) : "";
+        })
+        .filter(Boolean)
+        .join(" ");
+    });
+    return previews;
+  }, []);
 
   return (
     <div className="container">
@@ -139,10 +159,7 @@ function App() {
           {inputText && (
             <button
               className="clear-button"
-              onClick={() => {
-                setInputText("");
-                textareaRef.current?.focus();
-              }}
+              onClick={handleClearInput}
               title="クリア"
             >
               ✕
@@ -152,32 +169,40 @@ function App() {
       </div>
 
       <div className="categories-container">
-        {Object.entries(categories).map(([categoryName, styleKeys]) =>
-          renderCategory(categoryName, styleKeys)
-        )}
+        {Object.entries(CATEGORIES).map(([categoryName, styleKeys]) => (
+          <div key={categoryName} className="category-section">
+            <div className="category-header">
+              <h2 className="category-title">{categoryName}</h2>
+              <span className="category-preview">{categoryPreview[categoryName]}</span>
+            </div>
+            <div className="results-grid">
+              {styleKeys.map((styleKey) => {
+                const charMap = STYLES[styleKey as StyleKey];
+                if (!charMap) return null;
+
+                const converted = convertText(inputText, charMap);
+                const charSet = formatCharacterSet(charMap);
+
+                return renderResultCard(converted, styleKey, styleKey, charSet);
+              })}
+            </div>
+          </div>
+        ))}
+
         <div className="category-section">
           <div className="category-header">
             <h2 className="category-title">Plain Text</h2>
             <span className="category-preview">元の文字列, 大文字・小文字変換</span>
           </div>
-          <div className="results-grid">
-            {renderFunctionCard("Plain Text (元に戻す)", convertToPlainText, "plaintext")}
-            {renderFunctionCard("大文字 (UPPERCASE)", toUpperCase, "uppercase")}
-            {renderFunctionCard("小文字 (lowercase)", toLowerCase, "lowercase")}
-            {renderFunctionCard("大小反転 (tOGGLE cASE)", toggleCase, "togglecase")}
-          </div>
+          {renderFunctionCards(FUNCTION_CARDS)}
         </div>
+
         <div className="category-section">
           <div className="category-header">
             <h2 className="category-title">Width & Dakuten</h2>
             <span className="category-preview">全角・半角・濁点</span>
           </div>
-          <div className="results-grid">
-            {renderFunctionCard("全角 (Full Width)", fullWidth, "fullwidth")}
-            {renderFunctionCard("半角 (Half Width)", halfWidth, "halfwidth")}
-            {renderFunctionCard("濁点追加 (Add Dakuten)", addCombiningDakutenToAll, "dakuten")}
-            {renderFunctionCard("半角濁点追加 (Add Half Dakuten)", addHalfwidthDakutenToAll, "half-dakuten")}
-          </div>
+          {renderFunctionCards(WIDTH_DAKUTEN_CARDS)}
         </div>
       </div>
 
