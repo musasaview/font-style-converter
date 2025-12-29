@@ -80,13 +80,11 @@ body {
   top: 0;
   z-index: 100;
   padding: 20px 0;
-  background: linear-gradient(135deg, #a8d8ea 0%, #d4f1f4 50%, #b8e6f0 100%);
 }
 
 .textarea-wrapper {
   position: relative;
   width: 100%;
-  max-width: 700px;
 }
 
 .input-textarea {
@@ -96,7 +94,7 @@ body {
   font-size: 1.1rem;
   border: 2px solid rgba(74, 144, 164, 0.2);
   border-radius: 16px;
-  background: transparent;
+  background: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   resize: vertical;
   font-family: inherit;
@@ -202,18 +200,6 @@ body {
 @media (min-width: 1400px) {
   .results-grid {
     grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .results-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .results-grid {
-    grid-template-columns: 1fr;
   }
 }
 
