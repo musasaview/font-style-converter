@@ -4,10 +4,11 @@ import { FiCheck, FiCopy, FiX, FiGithub } from "react-icons/fi";
 import { convertAll, type TextStyle } from "./lib/catalog";
 import "./style.css";
 
+const SAMPLE_TEXT = "ABCD abcd あいう\n0123456789";
+
 interface ResultProps {
   style: TextStyle;
   output: string;
-  empty: boolean;
   unchanged: boolean;
   copied: boolean;
   onCopy: () => void;
@@ -17,7 +18,6 @@ interface ResultProps {
 function Result({
   style,
   output,
-  empty,
   unchanged,
   copied,
   onCopy,
@@ -29,8 +29,8 @@ function Result({
       title={`${style.name}: ${style.specimen ?? style.description}`}
     >
       <div className="result-body">
-        <div className={`result-text${empty ? " placeholder" : ""}`} dir="auto">
-          {empty ? "入力するとここに表示されます" : output}
+        <div className="result-text" dir="auto">
+          {output}
         </div>
         <button
           className={`copy-button${copied ? " is-copied" : ""}`}
@@ -41,7 +41,7 @@ function Result({
                 ? "変換による変化はありません"
                 : "コピー"
           }
-          disabled={empty || unchanged}
+          disabled={unchanged}
           onClick={onCopy}
           aria-label={`${plain ? "装飾なし" : style.name}をコピー`}
         >
@@ -62,7 +62,7 @@ function Result({
 }
 
 function App() {
-  const [input, setInput] = useState("Hello World 123");
+  const [input, setInput] = useState("");
   const [hideUnchanged, setHideUnchanged] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
@@ -79,12 +79,16 @@ function App() {
     if (copyError) fallback.current?.select();
   }, [copyError]);
 
-  const { plainText, results } = useMemo(() => convertAll(input), [input]);
+  const sourceText = input === "" ? SAMPLE_TEXT : input;
+  const { plainText, results } = useMemo(
+    () => convertAll(sourceText),
+    [sourceText],
+  );
   const grouped = Map.groupBy(
     results.filter(
       (result) =>
         result.style.id !== "plain" &&
-        (!hideUnchanged || (input !== "" && result.output !== plainText)),
+        (!hideUnchanged || result.output !== plainText),
     ),
     (result) => result.style.category,
   );
@@ -146,14 +150,13 @@ function App() {
             value={input}
             onChange={(event) => updateInput(event.target.value)}
             spellCheck={false}
-            placeholder="ここに文字を入力・貼り付け"
+            placeholder={SAMPLE_TEXT}
             rows={6}
           />
           <Result
             {...plain}
             plain
-            empty={!input}
-            unchanged={plain.output === input}
+            unchanged={plain.output === sourceText}
             copied={copied === "plain"}
             onCopy={() => copy(plain.output, "plain", "装飾なし")}
           />
@@ -193,9 +196,7 @@ function App() {
         </div>
         {grouped.size === 0 && (
           <p className="empty-results">
-            {input
-              ? "変換できる文字種がありません。チェックを外すとすべて表示します。"
-              : "文字を入力すると、変換結果が表示されます。"}
+            変換できる文字種がありません。チェックを外すとすべて表示します。
           </p>
         )}
         {Array.from(grouped, ([category, items]) => (
@@ -210,7 +211,6 @@ function App() {
                 <Result
                   key={result.style.id}
                   {...result}
-                  empty={!input}
                   unchanged={result.output === plainText}
                   copied={copied === result.style.id}
                   onCopy={() =>
