@@ -1,4 +1,5 @@
 import { STYLES, CATEGORIES } from "./character-maps";
+import { extraStyles } from "./extra-styles";
 import {
   convertText,
   convertToPlainText,
@@ -154,6 +155,8 @@ catalog.push(
     convert: addHalfwidthDakutenToAll,
   },
 );
+
+catalog.push(...extraStyles);
 
 export function convertAll(input: string) {
   const plainText = convertToPlainText(input);

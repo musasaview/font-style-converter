@@ -1,4 +1,5 @@
 import { STYLES, type CharacterMap } from "./character-maps";
+import { EXTRA_MAPS } from "./extra-maps";
 
 const segmenter = new Intl.Segmenter("ja", { granularity: "grapheme" });
 export function graphemes(input: string): string[] {
@@ -37,7 +38,12 @@ export function convertText(input: string, charMap: CharacterMap): string {
 }
 
 const plainMap: CharacterMap = {};
-for (const map of Object.values(STYLES)) {
+for (const map of [
+  ...Object.values(STYLES),
+  ...EXTRA_MAPS.filter((style) => style.reversible !== false).map(
+    (style) => style.map,
+  ),
+]) {
   for (const [source, target] of Object.entries(map)) {
     if (source !== target && plainMap[target] === undefined)
       plainMap[target] = source;
@@ -46,7 +52,12 @@ for (const map of Object.values(STYLES)) {
 
 export function convertToPlainText(input: string): string {
   return normalizeText(
-    graphemes(input)
+    graphemes(
+      input.replace(
+        /[\u0332\u0333\u0335-\u0338\u0305\u033F\u20DD-\u20DF\u20E4]/gu,
+        "",
+      ),
+    )
       .map((cluster) => {
         // Leave emoji sequences (including variation selectors and keycaps) intact.
         if (/[\uFE0F\u200D\u20E3]/u.test(cluster)) return cluster;
