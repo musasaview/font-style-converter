@@ -7,7 +7,7 @@ const output = (id: string, text: string) =>
 
 describe("additional alphabets and numbers", () => {
   test("all style IDs are unique and the original styles remain", () => {
-    expect(catalog).toHaveLength(102);
+    expect(catalog).toHaveLength(82);
     expect(new Set(catalog.map((style) => style.id)).size).toBe(catalog.length);
     for (const id of [
       "Bold",
@@ -44,22 +44,19 @@ describe("additional alphabets and numbers", () => {
     expect(output("Bold", "ᵃᵇᶜ ¹²³")).toBe("𝐚𝐛𝐜 𝟏𝟐𝟑");
     expect(output("Bold", "🄐🄑🄒")).toBe("𝐀𝐁𝐂");
     expect(output("Italic", "A\u0332B\u0332")).toBe("𝐴𝐵");
-    expect(convertToPlainText("⠓⠑⠇⠇⠕")).toBe("hello");
+    expect(convertToPlainText("⠓⠑⠇⠇⠕")).toBe("⠓⠑⠇⠇⠕");
     expect(convertToPlainText("こんにちは 一二三")).toBe("こんにちは 一二三");
   });
   test("new decorations never split emoji sequences", () => {
     const emoji = "👨‍👩‍👧‍👦";
-    expect(output("underline", emoji)).toBe(emoji + "\u0332");
+
     expect(output("reverse", "A" + emoji + "B")).toBe("B" + emoji + "A");
-    expect(output("letter-spaced", "A" + emoji + "B")).toBe(
-      "A " + emoji + " B",
-    );
+
     expect(convertToPlainText(emoji + "\u0332")).toBe(emoji);
   });
   test("encoding variants have known results", () => {
     expect(output("morse", "SOS 1")).toBe("... --- ... / .----");
-    expect(output("binary-ascii", "A1")).toBe("01000001 00110001");
-    expect(output("hex-ascii", "A1")).toBe("41 31");
+
     expect(output("leet", "TEST")).toBe("7357");
   });
   test("map targets contain no replacement characters or empty strings", () => {
@@ -69,4 +66,33 @@ describe("additional alphabets and numbers", () => {
         expect(target).not.toContain("\uFFFD");
       }
   });
+});
+
+test("removed effects stay absent and categories integrate old and new styles", () => {
+  for (const id of [
+    "underline",
+    "strikethrough",
+    "letter-spaced",
+    "binary-ascii",
+    "hex-ascii",
+    "braille-look",
+  ])
+    expect(catalog.some((style) => style.id === id)).toBe(false);
+  expect(
+    catalog.some((style) =>
+      /追加|線・囲みの装飾|英字の組み合わせ/.test(style.category),
+    ),
+  ).toBe(false);
+  const category = (id: string) =>
+    catalog.find((style) => style.id === id)!.category;
+  expect(category("Circled Digit")).toBe(category("sans-circled-digits"));
+  expect(category("Parenthesized")).toBe(category("parenthesized-capitals"));
+  expect(category("Spades ♠")).not.toBe(category("Circled Digit"));
+});
+test("rune, Hangul and kanji glyph conversions", () => {
+  expect(output("runes", "ABC abc")).toBe("ᚨᛒᚲ ᚨᛒᚲ");
+  expect(output("hangul-look", "ABC abc")).toBe("ㅐㅂㄷ ㅐㅂㄷ");
+  expect(output("old-kanji", "国学体")).toBe("國學體");
+  expect(output("kangxi-radicals", "一人山")).toBe("⼀⼈⼭");
+  expect(output("squared-kanji", "月有満")).toBe("🈷🈶🈵");
 });

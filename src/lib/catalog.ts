@@ -18,16 +18,9 @@ export interface TextStyle {
   category: string;
   description: string;
   specimen?: string;
+  note?: string;
   convert: (input: string) => string;
 }
-const groups: Record<keyof typeof CATEGORIES, string> = {
-  "Serif Styles": "セリフ",
-  "Sans-Serif Styles": "サンセリフ",
-  "Monospace & Script": "等幅・筆記体",
-  "Enclosed Characters": "囲み文字",
-  "Gothic & Decorative": "装飾",
-  Numbers: "数字・記号",
-};
 const names: Record<string, string> = {
   Bold: "太字",
   Italic: "斜体",
@@ -67,7 +60,7 @@ const names: Record<string, string> = {
 };
 
 export const catalog: TextStyle[] = Object.entries(CATEGORIES).flatMap(
-  ([group, ids]) =>
+  ([, ids]) =>
     ids.map((id) => {
       const map = STYLES[id];
       const keys = Object.keys(map);
@@ -82,7 +75,7 @@ export const catalog: TextStyle[] = Object.entries(CATEGORIES).flatMap(
       return {
         id,
         name: names[id] ?? id,
-        category: groups[group as keyof typeof CATEGORIES],
+        category: "",
         description: supported,
         specimen: Object.entries(map)
           .sort(
@@ -157,6 +150,122 @@ catalog.push(
 );
 
 catalog.push(...extraStyles);
+
+// One ordered taxonomy for every style, regardless of when it was introduced.
+export const styleGroups: Record<string, string[]> = {
+  "英字 · セリフ・サンセリフ": [
+    "Bold",
+    "Italic",
+    "Bold Italic",
+    "Sans-Serif",
+    "Sans-Serif Bold",
+    "Sans-Serif Italic",
+    "Sans-Serif Bold Italic",
+  ],
+  "英字 · 筆記体・装飾書体": [
+    "Script",
+    "Bold Script",
+    "Fraktur",
+    "Bold Fraktur",
+    "Double-Struck",
+    "Monospace",
+    "Small Caps",
+    "stroked",
+    "Fancy Strong",
+  ],
+  "英字 · 囲み文字": [
+    "Circled",
+    "Negative Circled",
+    "Squared",
+    "Negative Squared",
+    "Parenthesized",
+    "parenthesized-capitals",
+  ],
+  "英字 · 他文字の字形": [
+    "greek-look",
+    "cyrillic-look",
+    "runes",
+    "hangul-look",
+  ],
+  "上付き・下付き": [
+    "superscript",
+    "superscript-capitals",
+    "subscript",
+    "Subscript Numbers",
+  ],
+  "数字 · 囲み・装飾": [
+    "Circled Digit",
+    "Filled Circled Digit",
+    "Double Circled Numbers",
+    "sans-circled-digits",
+    "sans-negative-digits",
+    "Parenthesized Digit",
+    "period-digits",
+    "comma-digits",
+    "keycap-digits",
+    "segmented-digits",
+  ],
+  "数字 · 漢数字・ローマ数字・算木": [
+    "kanji-digits",
+    "daiji-digits",
+    "roman-upper",
+    "roman-lower",
+    "counting-rods",
+    "counting-rods-horizontal",
+  ],
+  "数字 · 各国の字形": [
+    "arabic-indic-digits",
+    "persian-digits",
+    "devanagari-digits",
+    "bengali-digits",
+    "thai-digits",
+    "myanmar-digits",
+    "tibetan-digits",
+    "khmer-digits",
+    "lao-digits",
+  ],
+  "漢字 · 旧字体・部首・囲み": [
+    "old-kanji",
+    "kangxi-radicals",
+    "漢数字 (Circled)",
+    "squared-kanji",
+  ],
+  "記号 · トランプ・麻雀・サイコロ": [
+    "Spades ♠",
+    "Hearts ♥",
+    "Diamonds ♦",
+    "Clubs ♣",
+    "Mahjong Characters 萬",
+    "Mahjong Circles 筒",
+    "Mahjong Bamboos 索",
+    "Dice Numbers",
+    "Chemical Numbers",
+  ],
+  "点字・符号": ["braille", "morse"],
+  "反転・文字置換": ["upside-glyphs", "upside-down", "reverse", "leet"],
+  "大文字・小文字・全角・半角": [
+    "plain",
+    "upper",
+    "lower",
+    "invert",
+    "full",
+    "half",
+  ],
+  濁点: ["dakuten", "half-dakuten"],
+};
+const orderedStyles = Object.entries(styleGroups).flatMap(([category, ids]) =>
+  ids.map((id) => {
+    const style = catalog.find((style) => style.id === id);
+    if (!style) throw new Error(`Unknown style: ${id}`);
+    return { ...style, category };
+  }),
+);
+if (
+  orderedStyles.length !== catalog.length ||
+  new Set(orderedStyles.map((style) => style.id)).size !== catalog.length
+)
+  throw new Error("Every style must belong to exactly one category");
+catalog.splice(0, catalog.length, ...orderedStyles);
 
 export function convertAll(input: string) {
   const plainText = convertToPlainText(input);

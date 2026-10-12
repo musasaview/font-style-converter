@@ -48,6 +48,7 @@ function Result({
           {copied ? <FiCheck /> : <FiCopy />}
         </button>
       </div>
+      {style.note && <p className="result-note">{style.note}</p>}
       <div className="result-footer">
         <h3 title={style.description}>{plain ? "装飾なし" : style.name}</h3>
         {style.specimen && (
