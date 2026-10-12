@@ -245,19 +245,19 @@ export const STYLES = {
 
   "Spades \u2660": { '0': '🃟', '1': '🂡', '2': '🂢', '3': '🂣', '4': '🂤', '5': '🂥',
     '6': '🂦', '7': '🂧', '8': '🂨', '9': '🂩',
-    'J': '🂫', 'Q': '🂬', 'K': '🂭', },
+    'J': '🂫', 'Q': '🂭', 'K': '🂮', },
 
   "Hearts \u2665": { '0': '🃟', '1': '🂱', '2': '🂲', '3': '🂳', '4': '🂴', '5': '🂵',
     '6': '🂶', '7': '🂷', '8': '🂸', '9': '🂹',
-    'J': '🂻', 'Q': '🂼', 'K': '🂽', },
+    'J': '🂻', 'Q': '🂽', 'K': '🂾', },
 
   "Diamonds \u2666": { '0': '🃟', '1': '🃁', '2': '🃂', '3': '🃃', '4': '🃄', '5': '🃅',
     '6': '🃆', '7': '🃇', '8': '🃈', '9': '🃉',
-    'J': '🃋', 'Q': '🃌', 'K': '🃍', },
+    'J': '🃋', 'Q': '🃍', 'K': '🃎', },
 
   "Clubs \u2663": { '0': '🃟', '1': '🃑', '2': '🃒', '3': '🃓', '4': '🃔', '5': '🃕',
     '6': '🃖', '7': '🃗', '8': '🃘', '9': '🃙',
-    'J': '🃛', 'Q': '🃜', 'K': '🃝', },
+    'J': '🃛', 'Q': '🃝', 'K': '🃞', },
 
   "Mahjong Characters \u842c": { '0': '🀆', '1': '🀇', '2': '🀈', '3': '🀉', '4': '🀊',
     '5': '🀋', '6': '🀌', '7': '🀍', '8': '🀎', '9': '🀏', },
@@ -283,22 +283,3 @@ export const CATEGORIES = {
     "Mahjong Characters 萬", "Mahjong Circles 筒", "Mahjong Bamboos 索"
   ]
 } as const;
-
-/**
- * Inverse character maps for converting styled text back to plain text
- */
-function createInverseMaps() {
-  const inverseMaps: Record<string, CharacterMap> = {};
-
-  Object.entries(STYLES).forEach(([key, charMap]) => {
-    const inverse: CharacterMap = {};
-    Object.entries(charMap).forEach(([from, to]) => {
-      inverse[to] = from;
-    });
-    inverseMaps[key] = inverse;
-  });
-
-  return inverseMaps;
-}
-
-export const INVERSE_MAPS = createInverseMaps();

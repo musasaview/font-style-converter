@@ -1,14 +1,11 @@
 import index from "./index.html";
 
-Bun.serve({
-  routes: {
-    "/": index,
-  },
-  development: {
+const server = Bun.serve({
+  routes: { "/": index },
+  development: process.env.NODE_ENV !== "production" && {
     hmr: true,
     console: true,
   },
-  port: 3000,
+  port: Number(process.env.PORT || 3000),
 });
-
-console.log("Server running at http://localhost:3000");
+console.log(`Server running at ${server.url}`);

@@ -1,237 +1,259 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { STYLES, CATEGORIES } from "./lib/character-maps";
-import {
-  convertText,
-  fullWidth,
-  halfWidth,
-  addHalfwidthDakutenToAll,
-  addCombiningDakutenToAll,
-  toUpperCase,
-  toLowerCase,
-  convertToPlainText,
-} from "./lib/converter";
-import { FaXTwitter, FaGithub } from "react-icons/fa6";
+import { FiCheck, FiCopy, FiX, FiGithub } from "react-icons/fi";
+import { convertAll, type TextStyle } from "./lib/catalog";
 import "./style.css";
 
-type StyleKey = keyof typeof STYLES;
-
-interface FunctionCard {
-  name: string;
-  key: string;
-  fn: (str: string) => string;
+interface ResultProps {
+  style: TextStyle;
+  output: string;
+  empty: boolean;
+  unchanged: boolean;
+  copied: boolean;
+  onCopy: () => void;
+  plain?: boolean;
 }
 
-const FUNCTION_CARDS: FunctionCard[] = [
-  { name: "Plain Text (元に戻す)", key: "plaintext", fn: convertToPlainText },
-  { name: "大文字 (UPPERCASE)", key: "uppercase", fn: toUpperCase },
-  { name: "小文字 (lowercase)", key: "lowercase", fn: toLowerCase },
-];
-
-const WIDTH_DAKUTEN_CARDS: FunctionCard[] = [
-  { name: "全角 (Full Width)", key: "fullwidth", fn: fullWidth },
-  { name: "半角 (Half Width)", key: "halfwidth", fn: halfWidth },
-  { name: "濁点追加 (Add Dakuten)", key: "dakuten", fn: addCombiningDakutenToAll },
-  { name: "半角濁点追加 (Add Half Dakuten)", key: "half-dakuten", fn: addHalfwidthDakutenToAll },
-];
-
-function formatCharacterSet(charMap: Record<string, string>): string {
-  const lowercase: string[] = [];
-  const uppercase: string[] = [];
-  const digits: string[] = [];
-
-  Object.entries(charMap).forEach(([from, to]) => {
-    if (/[a-z]/.test(from)) {
-      lowercase.push(to);
-    } else if (/[A-Z]/.test(from)) {
-      uppercase.push(to);
-    } else if (/[0-9]/.test(from)) {
-      digits.push(to);
-    }
-  });
-
-  const parts = [];
-  if (uppercase.length > 0) parts.push(uppercase.join(''));
-  if (lowercase.length > 0) parts.push(lowercase.join(''));
-  if (digits.length > 0) parts.push(digits.join(''));
-
-  return parts.join(' ');
+function Result({
+  style,
+  output,
+  empty,
+  unchanged,
+  copied,
+  onCopy,
+  plain,
+}: ResultProps) {
+  return (
+    <article
+      className={`result${plain ? " plain-result" : ""}${unchanged ? " unchanged" : ""}`}
+      title={`${style.name}: ${style.specimen ?? style.description}`}
+    >
+      <div className="result-body">
+        <div className={`result-text${empty ? " placeholder" : ""}`} dir="auto">
+          {empty ? "入力するとここに表示されます" : output}
+        </div>
+        <button
+          className={`copy-button${copied ? " is-copied" : ""}`}
+          title={
+            copied
+              ? "コピーしました"
+              : unchanged
+                ? "変換による変化はありません"
+                : "コピー"
+          }
+          disabled={empty || unchanged}
+          onClick={onCopy}
+          aria-label={`${plain ? "装飾なし" : style.name}をコピー`}
+        >
+          {copied ? <FiCheck /> : <FiCopy />}
+        </button>
+      </div>
+      <div className="result-footer">
+        <h3 title={style.description}>{plain ? "装飾なし" : style.name}</h3>
+        {style.specimen && (
+          <span className="specimen" aria-label={`${style.name}の文字見本`}>
+            {style.specimen}
+          </span>
+        )}
+      </div>
+    </article>
+  );
 }
 
 function App() {
-  const [inputText, setInputText] = useState("El Psy Kongroo. 1.048596");
-  const [copiedStyle, setCopiedStyle] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
+  const [input, setInput] = useState("Hello World 123");
+  const [hideUnchanged, setHideUnchanged] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
+  const [copyError, setCopyError] = useState<{
+    name: string;
+    text: string;
+  } | null>(null);
+  const textarea = useRef<HTMLTextAreaElement>(null);
+  const fallback = useRef<HTMLTextAreaElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const copyAttempt = useRef(0);
+  useEffect(() => () => clearTimeout(timer.current), []);
   useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
+    if (copyError) fallback.current?.select();
+  }, [copyError]);
 
-  const copyToClipboard = async (text: string, styleKey: string) => {
+  const { plainText, results } = useMemo(() => convertAll(input), [input]);
+  const grouped = Map.groupBy(
+    results.filter(
+      (result) =>
+        result.style.id !== "plain" &&
+        (!hideUnchanged || (input !== "" && result.output !== plainText)),
+    ),
+    (result) => result.style.category,
+  );
+  const plain = results.find((result) => result.style.id === "plain")!;
+
+  function updateInput(value: string) {
+    ++copyAttempt.current;
+    setInput(value);
+    setCopied(null);
+    setNotice("");
+    setCopyError(null);
+    clearTimeout(timer.current);
+  }
+  async function copy(text: string, id: string, name: string) {
+    const attempt = ++copyAttempt.current;
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedStyle(styleKey);
-      setTimeout(() => setCopiedStyle(null), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
+      if (attempt !== copyAttempt.current) return;
+      setCopied(id);
+      setCopyError(null);
+      setNotice(`${name}をコピーしました`);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        setCopied(null);
+        setNotice("");
+      }, 2000);
+    } catch {
+      if (attempt === copyAttempt.current) setCopyError({ name, text });
     }
-  };
-
-  const handleClearInput = () => {
-    setInputText("");
-    textareaRef.current?.focus();
-  };
-
-  const renderResultCard = (
-    converted: string,
-    styleKey: string,
-    styleName: string,
-    charSet?: string
-  ) => {
-    const hasChange = converted !== inputText;
-    const isEmpty = !inputText || !hasChange;
-    const title = charSet ? `${styleName}: ${charSet}` : styleName;
-
-    return (
-      <div
-        key={styleKey}
-        className={`result-card ${isEmpty ? "empty" : ""}`}
-        title={title}
-      >
-        <div className="card-content">{converted || inputText}</div>
-        <button
-          className={`copy-button ${copiedStyle === styleKey ? "copied" : ""}`}
-          onClick={() => copyToClipboard(converted || inputText, styleKey)}
-          title="コピー"
-          disabled={isEmpty}
-        >
-          {copiedStyle === styleKey ? "✓" : "📋"}
-        </button>
-      </div>
-    );
-  };
-
-  const renderFunctionCards = (cards: FunctionCard[]) => (
-    <div className="results-grid">
-      {cards.map(({ name, key, fn }) => {
-        const converted = fn(inputText);
-        return renderResultCard(converted, key, name);
-      })}
-    </div>
-  );
-
-  const categoryPreview = useMemo(() => {
-    const previews: Record<string, string> = {};
-    Object.entries(CATEGORIES).forEach(([categoryName, styleKeys]) => {
-      previews[categoryName] = styleKeys
-        .map(key => {
-          const charMap = STYLES[key as StyleKey];
-          return charMap ? formatCharacterSet(charMap) : "";
-        })
-        .filter(Boolean)
-        .join(" ");
-    });
-    return previews;
-  }, []);
+  }
 
   return (
-    <div className="container">
-      <header className="header">
-        <h1 className="title">
-          <span className="title-accent">font-style-converter</span>
-        </h1>
-        <p className="subtitle">文字列の見た目を変換するやつ。どこにも送信されないのでご安心を。</p>
-      </header>
-
-      <div className="input-section">
-        <div className="textarea-wrapper">
-          <textarea
-            ref={textareaRef}
-            className="input-textarea"
-            placeholder="テキストを入力してください..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            rows={4}
-            spellCheck={false}
-          />
-          {inputText && (
+    <main>
+      <aside className="sidebar" aria-label="入力と装飾なしの結果">
+        <header className="app-heading">
+          <span className="app-mark" aria-hidden="true">
+            Aa
+          </span>
+          <h1>font style converter</h1>
+        </header>
+        <section className="input-section">
+          <div className="input-heading">
+            <label htmlFor="source-text">変換したい文字を入力</label>
             <button
               className="clear-button"
-              onClick={handleClearInput}
-              title="クリア"
+              disabled={!input}
+              onClick={() => {
+                updateInput("");
+                textarea.current?.focus();
+              }}
             >
-              ✕
+              クリア
             </button>
-          )}
+          </div>
+          <textarea
+            id="source-text"
+            autoFocus
+            ref={textarea}
+            value={input}
+            onChange={(event) => updateInput(event.target.value)}
+            spellCheck={false}
+            placeholder="ここに文字を入力・貼り付け"
+            rows={6}
+          />
+          <Result
+            {...plain}
+            plain
+            empty={!input}
+            unchanged={plain.output === input}
+            copied={copied === "plain"}
+            onCopy={() => copy(plain.output, "plain", "装飾なし")}
+          />
+        </section>
+        <p className="privacy">入力内容は保存・送信されません</p>
+        <footer className="author">
+          <span>made by musasaview</span>
+          <a
+            href="https://x.com/musasaview"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="作者の X"
+          >
+            𝕏
+          </a>
+          <a
+            href="https://github.com/musasaview/font-style-converter"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub ソースコード"
+          >
+            <FiGithub />
+          </a>
+        </footer>
+      </aside>
+      <section className="results-section" aria-label="変換結果">
+        <div className="results-heading">
+          <h2>変換結果</h2>
+          <label className="filter-toggle">
+            <input
+              type="checkbox"
+              checked={hideUnchanged}
+              onChange={(event) => setHideUnchanged(event.target.checked)}
+            />
+            変換されない文字種を隠す
+          </label>
         </div>
-      </div>
-
-      <div className="categories-container">
-        {Object.entries(CATEGORIES).map(([categoryName, styleKeys]) => (
-          <div key={categoryName} className="category-section">
-            <div className="category-header">
-              <h2 className="category-title">{categoryName}</h2>
-              <span className="category-preview">{categoryPreview[categoryName]}</span>
-            </div>
+        {grouped.size === 0 && (
+          <p className="empty-results">
+            {input
+              ? "変換できる文字種がありません。チェックを外すとすべて表示します。"
+              : "文字を入力すると、変換結果が表示されます。"}
+          </p>
+        )}
+        {Array.from(grouped, ([category, items]) => (
+          <section
+            className="category-section"
+            key={category}
+            aria-label={category}
+          >
+            <h3 className="category-heading">{category}</h3>
             <div className="results-grid">
-              {styleKeys.map((styleKey) => {
-                const charMap = STYLES[styleKey as StyleKey];
-                if (!charMap) return null;
-
-                const converted = convertText(inputText, charMap);
-                const charSet = formatCharacterSet(charMap);
-
-                return renderResultCard(converted, styleKey, styleKey, charSet);
-              })}
+              {items.map((result) => (
+                <Result
+                  key={result.style.id}
+                  {...result}
+                  empty={!input}
+                  unchanged={result.output === plainText}
+                  copied={copied === result.style.id}
+                  onCopy={() =>
+                    copy(result.output, result.style.id, result.style.name)
+                  }
+                />
+              ))}
             </div>
-          </div>
+          </section>
         ))}
-
-        <div className="category-section">
-          <div className="category-header">
-            <h2 className="category-title">Plain Text</h2>
-            <span className="category-preview">元の文字列, 大文字・小文字変換</span>
-          </div>
-          {renderFunctionCards(FUNCTION_CARDS)}
-        </div>
-
-        <div className="category-section">
-          <div className="category-header">
-            <h2 className="category-title">Width & Dakuten</h2>
-            <span className="category-preview">全角・半角・濁点</span>
-          </div>
-          {renderFunctionCards(WIDTH_DAKUTEN_CARDS)}
-        </div>
+      </section>
+      <div className="sr-only" role="status">
+        {notice}
       </div>
-
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-text" title="made by musasaview">𝚖𝚊𝚍𝚎 𝚋𝚢 𝚖𝚞𝚜𝚊𝚜𝚊𝚟𝚒𝚎𝚠</div>
-          <div className="footer-links">
-            <a
-              href="https://x.com/musasaview"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-icon-link"
-              title="Twitter / X"
+      {copyError && (
+        <div className="copy-fallback" role="region" aria-label="手動コピー">
+          <div>
+            <strong>自動コピーが利用できません</strong>
+            <button
+              className="close-button"
+              aria-label="手動コピーを閉じる"
+              onClick={() => setCopyError(null)}
             >
-              <FaXTwitter size={20} />
-            </a>
-            <a
-              href="https://github.com/musasaview/font-style-converter"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-icon-link"
-              title="GitHub"
-            >
-              <FaGithub size={20} />
-            </a>
+              <FiX />
+            </button>
           </div>
+          <p>
+            選択された文字を Ctrl+C / ⌘C、または長押しでコピーしてください。
+          </p>
+          <textarea
+            ref={fallback}
+            readOnly
+            value={copyError.text}
+            aria-label={`${copyError.name}のコピー用テキスト`}
+            onFocus={(event) => event.currentTarget.select()}
+          />
         </div>
-      </footer>
-    </div>
+      )}
+    </main>
   );
 }
 
-const root = createRoot(document.getElementById("root")!);
+const container = document.getElementById("root")!;
+const root = import.meta.hot
+  ? (import.meta.hot.data.root ??= createRoot(container))
+  : createRoot(container);
 root.render(<App />);

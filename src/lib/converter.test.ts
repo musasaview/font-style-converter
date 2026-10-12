@@ -13,12 +13,12 @@ import { STYLES } from "./character-maps";
 
 describe("convertText", () => {
   test("converts characters based on mapping", () => {
-    const charMap = { A: '𝐀', B: '𝐁', C: '𝐂' };
+    const charMap = { A: "𝐀", B: "𝐁", C: "𝐂" };
     expect(convertText("ABC", charMap)).toBe("𝐀𝐁𝐂");
   });
 
   test("preserves unmapped characters", () => {
-    const charMap = { A: '𝐀', B: '𝐁' };
+    const charMap = { A: "𝐀", B: "𝐁" };
     expect(convertText("ABC", charMap)).toBe("𝐀𝐁C");
   });
 
@@ -50,7 +50,7 @@ describe("convertToPlainText", () => {
 
   test("preserves manually added combining marks", () => {
     const textWithDakuten = "H\u3099e\u3099l\u3099l\u3099o\u3099";
-    expect(convertToPlainText(textWithDakuten)).toBe(textWithDakuten.normalize('NFKC'));
+    expect(convertToPlainText(textWithDakuten)).toBe(textWithDakuten);
   });
 
   test("handles empty input", () => {
@@ -156,7 +156,9 @@ describe("unicode normalization", () => {
     const composedText = "é";
     const decomposedText = "e\u0301";
 
-    expect(convertToPlainText(composedText)).toBe(convertToPlainText(decomposedText));
+    expect(convertToPlainText(composedText)).toBe(
+      convertToPlainText(decomposedText),
+    );
   });
 
   test("handles katakana with dakuten correctly", () => {
@@ -201,5 +203,81 @@ describe("edge cases and integration", () => {
   test("handles Japanese text", () => {
     const japanese = "こんにちは世界";
     expect(convertText(japanese, STYLES.Bold)).toBe(japanese);
+  });
+});
+
+describe("restored conversion behavior", () => {
+  test("style conversion normalizes width, units and ligatures", () => {
+    expect(convertText("A ｶﾞ ㍿ ① ﬀ Ａ", STYLES.Bold)).toBe(
+      "𝐀 ガ 株式会社 𝟏 𝐟𝐟 𝐀",
+    );
+  });
+  test("plain text restores characters borrowed by Fancy Strong", () => {
+    expect(convertToPlainText("к є χ ค ๑")).toBe("k e x a q");
+  });
+  test("parenthesized letters are reversed before compatibility decomposition", () => {
+    expect(convertToPlainText("⒜⒝⑴⑵")).toBe("ab12");
+  });
+  test("inverse collisions prefer original Japanese rather than numeric lookalikes", () => {
+    expect(convertToPlainText("㊀㊁")).toBe("一二");
+  });
+  test("width conversion also normalizes compatibility characters", () => {
+    expect(halfWidth("Ａ　ガギグゲゴ パピプペポ ヴ。「」①㍿")).toBe(
+      "A ｶﾞｷﾞｸﾞｹﾞｺﾞ ﾊﾟﾋﾟﾌﾟﾍﾟﾎﾟ ｳﾞ｡｢｣1株式会社",
+    );
+    expect(fullWidth("A ｶﾞｷﾞｸﾞｹﾞｺﾞ ﾊﾟﾋﾟﾌﾟﾍﾟﾎﾟ ｳﾞ｡｢｣①㍿")).toBe(
+      "Ａ　ガギグゲゴ　パピプペポ　ヴ。「」１株式会社",
+    );
+  });
+  test("dakuten decorates whole emoji clusters and preserves whitespace", () => {
+    const emoji = "👨‍👩‍👧‍👦 👍🏽 🇯🇵 1️⃣ ❤️";
+    expect(addCombiningDakutenToAll(emoji + "\t\r\n!")).toBe(
+      "👨‍👩‍👧‍👦\u3099 👍🏽\u3099 🇯🇵\u3099 1️⃣\u3099 ❤️\u3099\t\r\n!\u3099",
+    );
+    expect(addHalfwidthDakutenToAll(emoji)).toBe("👨‍👩‍👧‍👦ﾞ 👍🏽ﾞ 🇯🇵ﾞ 1️⃣ﾞ ❤️ﾞ");
+  });
+  test("dakuten is appended to graphemes, not inside combining sequences", () => {
+    expect(addCombiningDakutenToAll("e\u0301")).toBe("é\u3099");
+    expect(addCombiningDakutenToAll("A\u3099")).toBe("A\u3099\u3099");
+  });
+  test("plain text preserves emoji presentation and keycaps", () => {
+    expect(convertToPlainText("🅰️ 1️⃣ 👨‍👩‍👧‍👦")).toBe("🅰️ 1️⃣ 👨‍👩‍👧‍👦");
+  });
+});
+
+describe("character map regressions", () => {
+  test("keycaps survive style and full-width conversion", () => {
+    expect(convertText("1️⃣ 2", STYLES.Bold)).toBe("1️⃣ 𝟐");
+    expect(fullWidth("1️⃣ 2")).toBe("1️⃣　２");
+  });
+  test("playing cards use queens and kings, not knights", () => {
+    expect(convertText("JQK", STYLES["Spades ♠"])).toBe("🂫🂭🂮");
+    expect(convertText("JQK", STYLES["Hearts ♥"])).toBe("🂻🂽🂾");
+    expect(convertText("JQK", STYLES["Diamonds ♦"])).toBe("🃋🃍🃎");
+    expect(convertText("JQK", STYLES["Clubs ♣"])).toBe("🃛🃝🃞");
+  });
+});
+
+describe("restored original features", () => {
+  test("converts fullwidth and already styled letters directly", () => {
+    expect(convertText("Ａ𝘈𝐴A", STYLES.Bold)).toBe("𝐀𝐀𝐀𝐀");
+  });
+  test("restores small caps and mixed letters", () => {
+    expect(convertToPlainText(convertText("hello", STYLES["Small Caps"]))).toBe(
+      "hello",
+    );
+    expect(
+      convertToPlainText(convertText("Hello", STYLES["Fancy Strong"])),
+    ).toBe("Hello");
+  });
+  test("normalizes compatibility characters in the plain result", () => {
+    expect(convertToPlainText("㍿ ﬀ Ａ ｶﾞ")).toBe("株式会社 ff A ガ");
+  });
+  test("adds dakuten to symbols and permits repeated additions", () => {
+    expect(addCombiningDakutenToAll("!★😀")).toBe("!\u3099★\u3099😀\u3099");
+    expect(addCombiningDakutenToAll(addCombiningDakutenToAll("A"))).toBe(
+      "A\u3099\u3099",
+    );
+    expect(addHalfwidthDakutenToAll("!★😀")).toBe("!ﾞ★ﾞ😀ﾞ");
   });
 });

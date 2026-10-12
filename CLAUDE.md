@@ -36,6 +36,7 @@ src/
 └── lib/
     ├── character-maps.ts   # 文字変換マップとスタイル定義
     ├── converter.ts        # 文字変換ロジック
+    ├── catalog.ts          # 表示名・カテゴリ・変換関数
     └── converter.test.ts   # テストコード
 ```
 
@@ -89,7 +90,10 @@ test("convertText converts characters correctly", () => {
 ## 依存関係
 
 - `react` & `react-dom`: ^19
-- `conv-str-width`: 全角半角変換(カスタムフォーク版)
 - `react-icons`: アイコン
 - `tailwindcss`: ^4.1.11
 - `bun-plugin-tailwind`: Tailwind CSS統合
+
+## 変換の制約
+
+元の変換機能を維持するため、全角・装飾済み文字と互換文字を NFKC 正規化する。絵文字の複合シーケンスは分断しない。標準文字への復元は全スタイルを対象とし、濁点は記号・絵文字への追加と重ね付けを許可する。回帰テストと `bun run typecheck`、`bun run build` で検証する。
