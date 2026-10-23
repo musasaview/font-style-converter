@@ -1,13 +1,22 @@
 import { toBraille } from "./braille";
 import type { TextStyle } from "./catalog";
 import { EXTRA_MAPS } from "./extra-maps";
-import { convertText, graphemes } from "./converter";
+import { createMapConverter, graphemes } from "./converter";
 
-function perLine(input: string, transform: (line: string) => string): string {
-  return input
-    .split(/(\r\n|\r|\n)/)
-    .map((line) => (/^[\r\n]+$/.test(line) ? line : transform(line)))
-    .join("");
+function perLine(
+  clusters: readonly string[],
+  transform: (line: readonly string[]) => string,
+): string {
+  const output: string[] = [];
+  let line: string[] = [];
+  for (const cluster of clusters) {
+    if (/^[\r\n]+$/.test(cluster)) {
+      output.push(transform(line), cluster);
+      line = [];
+    } else line.push(cluster);
+  }
+  output.push(transform(line));
+  return output.join("");
 }
 const lower = "abcdefghijklmnopqrstuvwxyz";
 const morseCodes = [
@@ -52,12 +61,13 @@ const morseMap = Object.fromEntries(
   Array.from(lower + "0123456789", (char, index) => [char, morseCodes[index]!]),
 );
 const upsideMap = EXTRA_MAPS.find((style) => style.id === "upside-glyphs")!.map;
+const upside = createMapConverter(upsideMap);
 function style(
   id: string,
   name: string,
   category: string,
   description: string,
-  convert: (input: string) => string,
+  convert: TextStyle["convert"],
 ): TextStyle {
   return {
     id,
@@ -65,7 +75,7 @@ function style(
     category,
     description,
     convert,
-    specimen: convert("Abc 123"),
+    specimen: convert("Abc 123", graphemes("Abc 123")),
   };
 }
 
@@ -79,43 +89,43 @@ export const extraStyles: TextStyle[] = [
     specimen: toBraille("あいうえお abc 123"),
     convert: toBraille,
   },
-  ...EXTRA_MAPS.map((entry) => ({
-    id: entry.id,
-    name: entry.name,
-    category: "",
-    description:
-      entry.description ??
-      (entry.id === "superscript"
-        ? "英字・数字。専用字形のない q はそのまま"
-        : entry.id === "subscript"
-          ? "対応する英字・数字。専用字形のない文字はそのまま"
-          : "対応する英字・数字を置換。表示はフォントによって異なります"),
-    specimen: Object.entries(entry.map)
-      .sort(
-        ([a], [b]) =>
-          Number(/^[0-9]$/.test(a)) - Number(/^[0-9]$/.test(b)) ||
-          a.codePointAt(0)! - b.codePointAt(0)!,
-      )
-      .map(([, value]) => value)
-      .join(""),
-    convert: (input: string) => convertText(input, entry.map),
-  })),
+  ...EXTRA_MAPS.map((entry) => {
+    const convert = createMapConverter(entry.map);
+    return {
+      id: entry.id,
+      name: entry.name,
+      category: "",
+      description:
+        entry.description ??
+        (entry.id === "superscript"
+          ? "英字・数字。専用字形のない q はそのまま"
+          : entry.id === "subscript"
+            ? "対応する英字・数字。専用字形のない文字はそのまま"
+            : "対応する英字・数字を置換。表示はフォントによって異なります"),
+      specimen: Object.entries(entry.map)
+        .sort(
+          ([a], [b]) =>
+            Number(/^[0-9]$/.test(a)) - Number(/^[0-9]$/.test(b)) ||
+            a.codePointAt(0)! - b.codePointAt(0)!,
+        )
+        .map(([, value]) => value)
+        .join(""),
+      convert: (_input: string, clusters: readonly string[]) => convert(clusters),
+    };
+  }),
   style(
     "reverse",
     "逆順",
     "文字あそび",
     "行ごとに文字順を反転。絵文字は分断しません",
-    (input) => perLine(input, (line) => graphemes(line).reverse().join("")),
+    (_input, clusters) => perLine(clusters, (line) => line.toReversed().join("")),
   ),
   style(
     "upside-down",
     "上下逆さま",
     "文字あそび",
     "行ごとに英字の向きと順序を反転",
-    (input) =>
-      perLine(convertText(input, upsideMap), (line) =>
-        graphemes(line).reverse().join(""),
-      ),
+    (_input, clusters) => perLine(clusters, (line) => upside(line.toReversed())),
   ),
   style(
     "leet",
@@ -136,15 +146,17 @@ export const extraStyles: TextStyle[] = [
     "モールス符号",
     "符号",
     "英字・数字を符号化。文字間は空白、単語間は /",
-    (input) =>
-      perLine(input, (line) =>
-        graphemes(line)
-          .map((char) =>
-            /^[ \t]+$/.test(char)
-              ? "/"
-              : (morseMap[char.toLowerCase()] ?? char),
-          )
-          .join(" "),
+    (_input, clusters) =>
+      perLine(clusters, (line) =>
+        line.some((cluster) => /^[A-Za-z0-9]$/.test(cluster))
+          ? line
+              .map((char) =>
+                /^[ \t]+$/.test(char)
+                  ? "/"
+                  : (morseMap[char.toLowerCase()] ?? char),
+              )
+              .join(" ")
+          : line.join(""),
       ),
   ),
 ];

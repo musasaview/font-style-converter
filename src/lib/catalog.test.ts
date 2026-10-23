@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { catalog, convertAll } from "./catalog";
 import { STYLES } from "./character-maps";
-import { convertText } from "./converter";
+import { convertText, graphemes } from "./converter";
 
 describe("conversion from undecorated input", () => {
   test("all conversions start from the plain result", () => {
@@ -15,6 +15,33 @@ describe("conversion from undecorated input", () => {
     expect(output("dakuten")).toBe(
       "h\u3099e\u3099l\u3099l\u3099o\u3099 1\u3099",
     );
+  });
+  test("radicals are undecorated once, without a second conversion to modern kanji", () => {
+    const { plainText, results } = convertAll("⿓⿆⿊");
+    expect(plainText).toBe("龍麥黑");
+    const unchangedStyles = [
+      "plain", "upper", "lower", "invert", "full", "half", "old-kanji",
+      "superscript", "arabic-indic-digits",
+    ];
+    for (const { style, output } of results) {
+      if (style.id in STYLES || unchangedStyles.includes(style.id))
+        expect(output).toBe(plainText);
+    }
+    const mixed = convertAll("⿓ ⿆ ⿊ 𝐀 ①");
+    expect(mixed.plainText).toBe("龍 麥 黑 A 1");
+    expect(mixed.results.find(({ style }) => style.id === "Bold")!.output).toBe(
+      "龍 麥 黑 𝐀 𝟏",
+    );
+    // The standalone entry point still undecorates its own input once.
+    expect(convertText("⿓ ⿆ ⿊ 𝐀 ①", STYLES.Bold)).toBe("龍 麥 黑 𝐀 𝟏");
+  });
+  test("converters accept shared immutable graphemes", () => {
+    const text = "Abc 123\r\n日本語 👨‍👩‍👧‍👦 A\u3099";
+    const clusters = Object.freeze(graphemes(text));
+    for (const style of catalog) {
+      expect(style.convert(text, clusters)).toContain("\r\n");
+    }
+    expect(clusters.join("")).toBe(text);
   });
   test("uppercase-only styles accept lowercase", () => {
     expect(convertText("Abc", STYLES.Squared)).toBe("🄰🄱🄲");

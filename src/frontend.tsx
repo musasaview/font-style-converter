@@ -11,7 +11,7 @@ interface ResultProps {
   output: string;
   unchanged: boolean;
   copied: boolean;
-  onCopy: () => void;
+  onCopy: (button: HTMLButtonElement) => void;
   plain?: boolean;
 }
 
@@ -34,15 +34,8 @@ function Result({
         </div>
         <button
           className={`copy-button${copied ? " is-copied" : ""}`}
-          title={
-            copied
-              ? "コピーしました"
-              : unchanged
-                ? "変換による変化はありません"
-                : "コピー"
-          }
-          disabled={unchanged}
-          onClick={onCopy}
+          title={copied ? "コピーしました" : "コピー"}
+          onClick={(event) => onCopy(event.currentTarget)}
           aria-label={`${plain ? "装飾なし" : style.name}をコピー`}
         >
           {copied ? <FiCheck /> : <FiCopy />}
@@ -63,7 +56,7 @@ function Result({
 
 function App() {
   const [input, setInput] = useState("");
-  const [hideUnchanged, setHideUnchanged] = useState(false);
+  const [hideUnchanged, setHideUnchanged] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [copyError, setCopyError] = useState<{
@@ -72,24 +65,48 @@ function App() {
   } | null>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const fallback = useRef<HTMLTextAreaElement>(null);
+  const copyOrigin = useRef<HTMLButtonElement | null>(null);
+  const resultsHeading = useRef<HTMLDivElement>(null);
+  const categoryHeadings = useRef(new Map<string, HTMLHeadingElement>());
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const copyAttempt = useRef(0);
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(
+    () => () => {
+      ++copyAttempt.current;
+      clearTimeout(timer.current);
+    },
+    [],
+  );
   useEffect(() => {
-    if (copyError) fallback.current?.select();
+    if (copyError) {
+      fallback.current?.focus();
+      fallback.current?.select();
+    }
   }, [copyError]);
+  useEffect(() => {
+    const heading = resultsHeading.current!;
+    const observer = new ResizeObserver(() => {
+      heading.parentElement?.style.setProperty(
+        "--results-toolbar-height",
+        `${heading.offsetHeight}px`,
+      );
+    });
+    observer.observe(heading);
+    return () => observer.disconnect();
+  }, []);
 
   const sourceText = input === "" ? SAMPLE_TEXT : input;
   const { plainText, results } = useMemo(
     () => convertAll(sourceText),
     [sourceText],
   );
+  const visibleResults = results.filter(
+    (result) =>
+      result.style.id !== "plain" &&
+      (!hideUnchanged || result.output !== plainText),
+  );
   const grouped = Map.groupBy(
-    results.filter(
-      (result) =>
-        result.style.id !== "plain" &&
-        (!hideUnchanged || result.output !== plainText),
-    ),
+    visibleResults,
     (result) => result.style.category,
   );
   const plain = results.find((result) => result.style.id === "plain")!;
@@ -102,8 +119,24 @@ function App() {
     setCopyError(null);
     clearTimeout(timer.current);
   }
-  async function copy(text: string, id: string, name: string) {
+  function closeCopyError() {
+    ++copyAttempt.current;
+    setCopyError(null);
+    const origin = copyOrigin.current;
+    (origin?.isConnected ? origin : textarea.current)?.focus();
+  }
+  async function copy(
+    text: string,
+    id: string,
+    name: string,
+    button: HTMLButtonElement,
+  ) {
     const attempt = ++copyAttempt.current;
+    clearTimeout(timer.current);
+    setCopied(null);
+    setNotice("");
+    setCopyError(null);
+    copyOrigin.current = button;
     try {
       await navigator.clipboard.writeText(text);
       if (attempt !== copyAttempt.current) return;
@@ -112,6 +145,7 @@ function App() {
       setNotice(`${name}をコピーしました`);
       clearTimeout(timer.current);
       timer.current = setTimeout(() => {
+        if (attempt !== copyAttempt.current) return;
         setCopied(null);
         setNotice("");
       }, 2000);
@@ -121,7 +155,14 @@ function App() {
   }
 
   return (
-    <main>
+    <main
+      onKeyDown={(event) => {
+        if (copyError && event.key === "Escape") {
+          event.preventDefault();
+          closeCopyError();
+        }
+      }}
+    >
       <aside className="sidebar" aria-label="入力と装飾なしの結果">
         <header className="app-heading">
           <span className="app-mark" aria-hidden="true">
@@ -158,7 +199,7 @@ function App() {
             plain
             unchanged={plain.output === sourceText}
             copied={copied === "plain"}
-            onCopy={() => copy(plain.output, "plain", "装飾なし")}
+            onCopy={(button) => copy(plain.output, "plain", "装飾なし", button)}
           />
         </section>
         <p className="privacy">入力内容は保存・送信されません</p>
@@ -183,8 +224,31 @@ function App() {
         </footer>
       </aside>
       <section className="results-section" aria-label="変換結果">
-        <div className="results-heading">
-          <h2>変換結果</h2>
+        <div className="results-heading" ref={resultsHeading}>
+          <h2>
+            変換結果 <span className="result-count">{visibleResults.length}件</span>
+          </h2>
+          <select
+            className="category-jump"
+            aria-label="カテゴリへ移動"
+            defaultValue=""
+            disabled={grouped.size === 0}
+            onChange={(event) => {
+              const heading = categoryHeadings.current.get(event.target.value);
+              event.currentTarget.value = "";
+              heading?.focus({ preventScroll: true });
+              heading?.scrollIntoView({ block: "start" });
+            }}
+          >
+            <option value="" disabled>
+              カテゴリへ移動
+            </option>
+            {Array.from(grouped.keys(), (category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
           <label className="filter-toggle">
             <input
               type="checkbox"
@@ -205,7 +269,16 @@ function App() {
             key={category}
             aria-label={category}
           >
-            <h3 className="category-heading">{category}</h3>
+            <h3
+              className="category-heading"
+              tabIndex={-1}
+              ref={(heading) => {
+                if (heading) categoryHeadings.current.set(category, heading);
+                else categoryHeadings.current.delete(category);
+              }}
+            >
+              {category}
+            </h3>
             <div className="results-grid">
               {items.map((result) => (
                 <Result
@@ -213,8 +286,13 @@ function App() {
                   {...result}
                   unchanged={result.output === plainText}
                   copied={copied === result.style.id}
-                  onCopy={() =>
-                    copy(result.output, result.style.id, result.style.name)
+                  onCopy={(button) =>
+                    copy(
+                      result.output,
+                      result.style.id,
+                      result.style.name,
+                      button,
+                    )
                   }
                 />
               ))}
@@ -232,7 +310,7 @@ function App() {
             <button
               className="close-button"
               aria-label="手動コピーを閉じる"
-              onClick={() => setCopyError(null)}
+              onClick={closeCopyError}
             >
               <FiX />
             </button>

@@ -1,14 +1,13 @@
 import { STYLES, CATEGORIES } from "./character-maps";
 import { extraStyles } from "./extra-styles";
 import {
-  convertText,
+  createMapConverter,
   convertToPlainText,
+  graphemes,
   fullWidth,
   halfWidth,
   addCombiningDakutenToAll,
   addHalfwidthDakutenToAll,
-  toUpperCase,
-  toLowerCase,
   invertCase,
 } from "./converter";
 
@@ -19,7 +18,8 @@ export interface TextStyle {
   description: string;
   specimen?: string;
   note?: string;
-  convert: (input: string) => string;
+  // Called with the undecorated source and its shared, immutable graphemes.
+  convert: (plainText: string, clusters: readonly string[]) => string;
 }
 const names: Record<string, string> = {
   Bold: "太字",
@@ -63,6 +63,7 @@ export const catalog: TextStyle[] = Object.entries(CATEGORIES).flatMap(
   ([, ids]) =>
     ids.map((id) => {
       const map = STYLES[id];
+      const convert = createMapConverter(map);
       const keys = Object.keys(map);
       const supported = [
         keys.some((c) => /[A-Z]/.test(c)) && "大文字",
@@ -85,7 +86,7 @@ export const catalog: TextStyle[] = Object.entries(CATEGORIES).flatMap(
           )
           .map(([, value]) => value)
           .join(""),
-        convert: (input: string) => convertText(input, map),
+        convert: (_input: string, clusters: readonly string[]) => convert(clusters),
       };
     }),
 );
@@ -96,21 +97,21 @@ catalog.push(
     name: "標準文字に戻す",
     category: "文字の整形",
     description: "装飾を解除。一部の文字は元に戻せません",
-    convert: convertToPlainText,
+    convert: (input) => input,
   },
   {
     id: "upper",
     name: "大文字",
     category: "文字の整形",
     description: "UPPERCASE",
-    convert: toUpperCase,
+    convert: (input) => input.toUpperCase(),
   },
   {
     id: "lower",
     name: "小文字",
     category: "文字の整形",
     description: "lowercase",
-    convert: toLowerCase,
+    convert: (input) => input.toLowerCase(),
   },
   {
     id: "invert",
@@ -269,11 +270,12 @@ catalog.splice(0, catalog.length, ...orderedStyles);
 
 export function convertAll(input: string) {
   const plainText = convertToPlainText(input);
+  const clusters = graphemes(plainText);
   return {
     plainText,
     results: catalog.map((style) => ({
       style,
-      output: style.id === "plain" ? plainText : style.convert(plainText),
+      output: style.convert(plainText, clusters),
     })),
   };
 }

@@ -7,7 +7,7 @@ export function graphemes(input: string): string[] {
 }
 
 // Restore compatibility normalization without breaking multi-codepoint emoji.
-function normalizeText(input: string): string {
+export function normalizeText(input: string): string {
   return graphemes(input)
     .map((cluster) =>
       /[\uFE0F\u200D\u20E3]/u.test(cluster)
@@ -18,23 +18,30 @@ function normalizeText(input: string): string {
 }
 
 export function convertText(input: string, charMap: CharacterMap): string {
+  return createMapConverter(charMap)(graphemes(convertToPlainText(input)));
+}
+
+// Compile case fallbacks once for catalog maps; input clusters are already plain.
+export function createMapConverter(charMap: CharacterMap) {
   const keys = Object.keys(charMap);
   const hasUpper = keys.some((key) => /^[A-Z]$/.test(key));
   const hasLower = keys.some((key) => /^[a-z]$/.test(key));
-  return graphemes(convertToPlainText(input))
-    .map((cluster) => {
-      if (/[\uFE0F\u200D\u20E3]/u.test(cluster)) return cluster;
-      return Array.from(cluster, (char) => {
-        const key =
-          hasUpper && !hasLower && /^[a-z]$/.test(char)
-            ? char.toUpperCase()
-            : hasLower && !hasUpper && /^[A-Z]$/.test(char)
-              ? char.toLowerCase()
-              : char;
-        return charMap[key] ?? char;
-      }).join("");
-    })
-    .join("");
+  const map = { ...charMap };
+  if (hasUpper !== hasLower) {
+    for (const key of keys) {
+      if (/^[A-Za-z]$/.test(key)) {
+        map[hasUpper ? key.toLowerCase() : key.toUpperCase()] = charMap[key]!;
+      }
+    }
+  }
+  return (clusters: readonly string[]): string =>
+    clusters
+      .map((cluster) => {
+        if (cluster.length === 1) return map[cluster] ?? cluster;
+        if (/[\uFE0F\u200D\u20E3]/u.test(cluster)) return cluster;
+        return Array.from(cluster, (char) => map[char] ?? char).join("");
+      })
+      .join("");
 }
 
 const plainMap: CharacterMap = {};
@@ -78,12 +85,13 @@ for (let point = 0xff61; point <= 0xff9d; point++) {
   }
 }
 
-export function fullWidth(input: string): string {
-  const kanaConverted = normalizeText(input).replace(
-    /[\uFF61-\uFF9F]+/gu,
-    (kana) => kana.normalize("NFKC"),
-  );
-  return graphemes(kanaConverted)
+// Optional clusters let the catalog share its normalized input. Standalone calls
+// still perform their original normalization before converting.
+export function fullWidth(
+  input: string,
+  clusters: readonly string[] = graphemes(normalizeText(input)),
+): string {
+  return clusters
     .map((cluster) => {
       if (/[\uFE0F\u200D\u20E3]/u.test(cluster)) return cluster;
       return cluster
@@ -95,34 +103,52 @@ export function fullWidth(input: string): string {
     .join("");
 }
 
-export function halfWidth(input: string): string {
-  return Array.from(normalizeText(input), (char) => {
-    if (/[！-～]/u.test(char))
-      return String.fromCharCode(char.charCodeAt(0) - 0xfee0);
-    if (char === "　") return " ";
-    if (char === "\u3099" || char === "゛") return "ﾞ";
-    if (char === "\u309a" || char === "゜") return "ﾟ";
-    return halfKana[char] ?? char;
-  }).join("");
+export function halfWidth(
+  input: string,
+  clusters: readonly string[] = graphemes(normalizeText(input)),
+): string {
+  return clusters
+    .map((cluster) =>
+      Array.from(cluster, (char) => {
+        if (/[！-～]/u.test(char))
+          return String.fromCharCode(char.charCodeAt(0) - 0xfee0);
+        if (char === "　") return " ";
+        if (char === "\u3099" || char === "゛") return "ﾞ";
+        if (char === "\u309a" || char === "゜") return "ﾟ";
+        return halfKana[char] ?? char;
+      }).join(""),
+    )
+    .join("");
 }
 
-function addDakuten(input: string, mark: string): string {
-  return graphemes(normalizeText(input))
+function addDakuten(clusters: readonly string[], mark: string): string {
+  return clusters
     .map((cluster) => {
       if (/^\s+$/u.test(cluster)) return cluster;
       return cluster + mark;
     })
     .join("");
 }
-export const addCombiningDakutenToAll = (input: string) =>
-  addDakuten(input, "\u3099");
-export const addHalfwidthDakutenToAll = (input: string) =>
-  addDakuten(input, "\uFF9E");
+export const addCombiningDakutenToAll = (
+  input: string,
+  clusters: readonly string[] = graphemes(normalizeText(input)),
+) => addDakuten(clusters, "\u3099");
+export const addHalfwidthDakutenToAll = (
+  input: string,
+  clusters: readonly string[] = graphemes(normalizeText(input)),
+) => addDakuten(clusters, "\uFF9E");
 export const toUpperCase = (input: string) =>
   convertToPlainText(input).toUpperCase();
 export const toLowerCase = (input: string) =>
   convertToPlainText(input).toLowerCase();
-export const invertCase = (input: string) =>
-  Array.from(convertToPlainText(input), (char) =>
-    char === char.toUpperCase() ? char.toLowerCase() : char.toUpperCase(),
-  ).join("");
+export const invertCase = (
+  input: string,
+  clusters: readonly string[] = graphemes(convertToPlainText(input)),
+) =>
+  clusters
+    .map((cluster) =>
+      Array.from(cluster, (char) =>
+        char === char.toUpperCase() ? char.toLowerCase() : char.toUpperCase(),
+      ).join(""),
+    )
+    .join("");

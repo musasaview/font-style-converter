@@ -1,3 +1,5 @@
+import { graphemes, normalizeText } from "./converter";
+
 // Japanese character transcription, based on Japan Braille Library's reading-side table:
 // https://www.nittento.or.jp/images/pdf/information/braille_lists.pdf
 // This does not infer kanji readings, particles, long-vowel spelling or word boundaries.
@@ -148,13 +150,16 @@ const punctuation: Record<string, string> = {
   ")": cell("2356"),
 };
 
-export function toBraille(input: string): string {
-  const chars = Array.from(
-    input
-      .normalize("NFKC")
-      .replace(/[ァ-ヶ]/g, (char) =>
-        String.fromCharCode(char.charCodeAt(0) - 0x60),
-      ),
+export function toBraille(
+  input: string,
+  clusters: readonly string[] = graphemes(normalizeText(input)),
+): string {
+  // Keep extended grapheme clusters intact (Unicode UAX #29), including emoji
+  // presentation selectors, keycaps and unsupported combining sequences.
+  const chars = clusters.map((cluster) =>
+    /^[ァ-ヶ]$/.test(cluster)
+      ? String.fromCharCode(cluster.charCodeAt(0) - 0x60)
+      : cluster,
   );
   let result = "";
   let previous: "kana" | "number" | "latin" | "other" = "other";

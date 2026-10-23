@@ -21,10 +21,9 @@ describe("additional alphabets and numbers", () => {
     }
   });
   test("all converters handle empty input and retain line breaks", () => {
-    for (const style of catalog) {
-      expect(style.convert("")).toBe("");
-      expect(style.convert("Abc 123\r\n日本語 😀").includes("\r\n")).toBe(true);
-    }
+    for (const { output } of convertAll("").results) expect(output).toBe("");
+    for (const { output } of convertAll("Abc 123\r\n日本語 😀").results)
+      expect(output).toContain("\r\n");
   });
   test("superscript, subscript and parenthesized capitals handle case", () => {
     expect(output("superscript", "ABC 123")).toBe("ᵃᵇᶜ ¹²³");
@@ -58,6 +57,15 @@ describe("additional alphabets and numbers", () => {
     expect(output("morse", "SOS 1")).toBe("... --- ... / .----");
 
     expect(output("leet", "TEST")).toBe("7357");
+  });
+  test("morse preserves lines with no supported alphanumeric graphemes", () => {
+    const text = "日本語 \t😀!?\r\n1️⃣ A\u3099\r \t \n\n";
+    expect(output("morse", text)).toBe(text);
+  });
+  test("morse only adds separators on supported lines and retains CRLF", () => {
+    expect(output("morse", "日本語 😀\r\nSOS 1\rAあ 1️⃣ B\u3099\n!?")).toBe(
+      "日本語 😀\r\n... --- ... / .----\r.- あ / 1️⃣ / B\u3099\n!?",
+    );
   });
   test("map targets contain no replacement characters or empty strings", () => {
     for (const style of EXTRA_MAPS)

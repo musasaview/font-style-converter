@@ -26,3 +26,16 @@ test("braille card uses undecorated input", () => {
   )!;
   expect(result.output).toBe(toBraille("Abc 1 が"));
 });
+test("braille preserves emoji and unsupported combining sequences as graphemes", () => {
+  const text = "1️⃣ ㊗️ ㊙️ 👨‍👩‍👧‍👦 👍🏽 🇯🇵 A\u3099 カ\u0301\r\n";
+  expect(toBraille(text)).toBe(text);
+  expect(
+    convertAll(text).results.find(({ style }) => style.id === "braille")!.output,
+  ).toBe(text);
+  expect(toBraille("A1️⃣B 1㊗️2")).toBe("⠰⠠⠁1️⃣⠰⠠⠃ ⠼⠁㊗️⠼⠃");
+});
+test("braille retains kana normalization and prefixes alongside emoji", () => {
+  expect(toBraille("ｶﾞか\u3099 きゃ 1️⃣ ㊗️ ㊙️ ABC 3.07\r\n5えん")).toBe(
+    "⠐⠡⠐⠡ ⠈⠡ 1️⃣ ㊗️ ㊙️ ⠰⠠⠠⠁⠃⠉ ⠼⠉⠂⠚⠛\r\n⠼⠑⠤⠋⠴",
+  );
+});
