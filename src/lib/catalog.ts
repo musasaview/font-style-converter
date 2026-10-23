@@ -206,11 +206,14 @@ export const styleGroups: Record<string, string[]> = {
     "keycap-digits",
     "segmented-digits",
   ],
-  "数字 · 漢数字・ローマ数字・算木": [
+  "数字 · 数の表記・算木": [
     "kanji-digits",
     "daiji-digits",
+    "kanji-number",
     "roman-upper",
     "roman-lower",
+    "roman-number",
+    "english-number",
     "counting-rods",
     "counting-rods-horizontal",
   ],
@@ -225,11 +228,14 @@ export const styleGroups: Record<string, string[]> = {
     "khmer-digits",
     "lao-digits",
   ],
-  "漢字 · 旧字体・部首・囲み": [
+  "漢字・かな · 字形・組文字": [
     "old-kanji",
     "kangxi-radicals",
     "漢数字 (Circled)",
     "squared-kanji",
+    "square-units",
+    "square-upper",
+    "square-lower",
   ],
   "記号 · トランプ・麻雀・サイコロ": [
     "Spades ♠",

@@ -2,6 +2,8 @@ import { toBraille } from "./braille";
 import type { TextStyle } from "./catalog";
 import { EXTRA_MAPS } from "./extra-maps";
 import { createMapConverter, graphemes } from "./converter";
+import { toEnglishNumbers, toKanjiNumbers, toRomanNumbers } from "./number-styles";
+import { toSquareLower, toSquareUnits, toSquareUpper } from "./square-styles";
 
 function perLine(
   clusters: readonly string[],
@@ -80,6 +82,54 @@ function style(
 }
 
 export const extraStyles: TextStyle[] = [
+  {
+    id: "kanji-number",
+    name: "漢数字（数値）",
+    category: "",
+    description: "15桁までの非負整数を十・百・千・万・億・兆で表記。ゼロは零",
+    specimen: toKanjiNumbers("123 10000"),
+    convert: toKanjiNumbers,
+  },
+  {
+    id: "roman-number",
+    name: "ローマ数字（数値）",
+    category: "",
+    description: "1〜3999の整数をローマ数字に変換。1〜12は専用字形",
+    specimen: toRomanNumbers("12 49 2026"),
+    convert: toRomanNumbers,
+  },
+  {
+    id: "english-number",
+    name: "英語（数値）",
+    category: "",
+    description: "15桁までの非負整数を米式の英語で表記。and は入れません",
+    specimen: toEnglishNumbers("123"),
+    convert: toEnglishNumbers,
+  },
+  {
+    id: "square-units",
+    name: "組文字・単位記号",
+    category: "",
+    description: "対応するカタカナ・漢字・単位を組文字へ。英字は大小を区別",
+    specimen: "㍿ ㋿ ㌍ ㍍ ㎏ ㎠",
+    convert: toSquareUnits,
+  },
+  {
+    id: "square-upper",
+    name: "組文字・上段読み",
+    category: "",
+    description: "上段のカタカナが入力と一致する組文字へ置換。上下の配置はフォントに依存",
+    specimen: "カロ → ㌍　メー → ㍍",
+    convert: toSquareUpper,
+  },
+  {
+    id: "square-lower",
+    name: "組文字・下段読み",
+    category: "",
+    description: "下段のカタカナが入力と一致する組文字へ置換。上下の配置はフォントに依存",
+    specimen: "リー → ㌍　トル → ㍍",
+    convert: toSquareLower,
+  },
   {
     id: "braille",
     name: "点字",

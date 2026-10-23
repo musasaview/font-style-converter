@@ -7,7 +7,7 @@ const output = (id: string, text: string) =>
 
 describe("additional alphabets and numbers", () => {
   test("all style IDs are unique and the original styles remain", () => {
-    expect(catalog).toHaveLength(82);
+    expect(catalog).toHaveLength(88);
     expect(new Set(catalog.map((style) => style.id)).size).toBe(catalog.length);
     for (const id of [
       "Bold",
