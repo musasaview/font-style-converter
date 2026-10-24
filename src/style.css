@@ -28,6 +28,10 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform 120ms ease-out;
+}
+button:not(:disabled):active {
+  transform: scale(0.96);
 }
 button:disabled {
   cursor: default;
@@ -270,6 +274,7 @@ h2 {
   background: #fff;
   overflow: hidden;
   box-shadow: 0 2px 3px #28395303;
+  animation: result-appear 160ms ease-out;
   transition:
     border-color 0.15s,
     box-shadow 0.15s;
@@ -277,6 +282,14 @@ h2 {
 .result:hover {
   border-color: #a6b8e1;
   box-shadow: 0 4px 14px #34476a09;
+}
+@keyframes result-appear {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .result-body {
   display: flex;
@@ -323,6 +336,22 @@ h2 {
 .copy-button.is-copied {
   color: #278566;
   background: #eaf7f0;
+}
+.copy-icon {
+  display: inline-flex;
+}
+.copy-button.is-copied .copy-icon {
+  animation: copy-success 160ms ease-out;
+}
+@keyframes copy-success {
+  from {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .result-footer {
   display: flex;
@@ -554,7 +583,11 @@ h2 {
 }
 @media (prefers-reduced-motion: reduce) {
   * {
+    animation: none !important;
     transition: none !important;
+  }
+  button:not(:disabled):active {
+    transform: none;
   }
 }
 

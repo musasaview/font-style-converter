@@ -38,7 +38,9 @@ function Result({
           onClick={(event) => onCopy(event.currentTarget)}
           aria-label={`${plain ? "装飾なし" : style.name}をコピー`}
         >
-          {copied ? <FiCheck /> : <FiCopy />}
+          <span className="copy-icon" aria-hidden="true">
+            {copied ? <FiCheck /> : <FiCopy />}
+          </span>
         </button>
       </div>
       {style.note && <p className="result-note">{style.note}</p>}
